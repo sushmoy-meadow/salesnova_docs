@@ -104,7 +104,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "pending",
+      "status": "in_progress",
       "description": "Implement the Idempotency-Key header contract on all billable/user-visible-artefact-creating POSTs (05-api-design.md section 9): 24h key+response storage, replay returns original response with X-Idempotent-Replay: true, same key + different body returns 409 CONFLICT. Implement If-Match/ETag optimistic concurrency on PATCH: a mismatch returns 409 CONCURRENT_MODIFICATION with the current record. Document which endpoints require the header (lead create, message send, campaign send, share mint, payment, bulk operations) versus which are naturally idempotent (share minting, WhatsApp ingest).",
       "spec_refs": [
         "SN-ARCH-091"
