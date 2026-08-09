@@ -1,0 +1,6 @@
+# Regenerated from tasks.json by tasks/cli/graph.js. Every status change would
+# otherwise be a conflict, so it is built locally rather than committed.
+/tasks/graph.html
+
+.DS_Store
+Thumbs.db
