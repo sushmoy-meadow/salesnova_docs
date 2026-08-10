@@ -30,20 +30,41 @@ One Laravel application, internally partitioned into domain modules with explici
 
 ### SN-ARCH-002 — Module boundaries
 
+Eleven modules, each owning its own tables:
+
 ```
-app/Domains/
-  Identity/       user, org, membership, subteam, auth, invitation
-  Leads/          lead, custom fields, groups, follow-ups, duplicates
-  Activity/       timeline_event, event, audit
-  Content/        content, pages, files, messages, folders, labels
-  Sharing/        shares, views, the public viewer
-  Sequences/      sequences, steps, enrolments, task queue
-  Automation/     rules, conditions, distribution, CAPI
-  Acquisition/    integrations, connections, lead forms, ingestion
-  Messaging/      WhatsApp accounts, conversations, messages, templates, campaigns
-  Billing/        plans, subscriptions, credits, invoices
-  Platform/       notifications, jobs, feature flags, settings, search
+Identity        user, org, membership, subteam, auth, invitation
+Leads           lead, custom fields, groups, follow-ups, duplicates
+Activity        timeline_event, event, audit
+Content         content, pages, files, messages, folders, labels
+Sharing         shares, views, the public viewer
+Sequences       sequences, steps, enrolments, task queue
+Automation      rules, conditions, distribution, CAPI
+Acquisition     integrations, connections, lead forms, ingestion
+Messaging       WhatsApp accounts, conversations, messages, templates, campaigns
+Billing         plans, subscriptions, credits, invoices
+Platform        notifications, jobs, feature flags, settings, search
 ```
+
+**A module is the second namespace segment, not a top-level directory.** The top level is
+responsibility-first, per the company architecture bible §1 — `Models/`, `Services/`, `Http/`,
+`Events/`, `Jobs/` and the rest — and each of those carries the module as a subdirectory:
+
+```
+app/
+  Models/
+    Leads/Lead.php                  App\Models\Leads\Lead
+    Organizations/Membership.php    App\Models\Organizations\Membership
+  Services/
+    Leads/LeadService.php           App\Services\Leads\LeadService
+  Events/
+    Leads/LeadAssigned.php          App\Events\Leads\LeadAssigned
+  Contracts/
+    Timeline/EventWriter.php        App\Contracts\Timeline\EventWriter
+```
+
+There is no `Domains` directory. A module's code is everything under its segment across every
+responsibility directory, which is what the boundary rules resolve a class's module from.
 
 Each module owns its models, services, policies, jobs and events. **Cross-module communication is
 through published domain events or an explicit public service interface — never by reaching into
@@ -54,6 +75,8 @@ The interfaces that carry that traffic live in `app/Contracts/{Domain}/`. In for
 ```
 PushSubjectInterface      Notifications ← any record       app/Contracts/Notifications
 EventWriter               Timeline ← any module            app/Contracts/Timeline
+EventReader               Timeline ← tooling               app/Contracts/Timeline
+SeatLimitResolver         Organizations ← Billing          app/Contracts/Billing
 ```
 
 `PushSubjectInterface` reduces a record to the organisation, type and id a client resolves it from,
@@ -64,6 +87,60 @@ is the absence of anything else to call rather than a rule each caller has to re
 a reference DTO rather than the model, so appending an event never hands another module a row it
 could write through. A test rule fails the build if anything outside the timeline module reaches the
 table or the model directly.
+
+`EventReader` is the read half, for tooling that has to reconstruct what happened — breach impact,
+analytics preparation, a question about one chain. `find(EventQueryDTO)` filters by event type and
+correlation id and returns `RecordedEventDTO`s in the order the events happened. The organisation is
+a constructor argument on the query rather than one more optional filter: the log is append-only and
+carries no global scope, so a signature able to express a query without a tenant is one that will
+eventually be handed none. Reads are capped at 1000 rows, and the event name comes back as a string
+because the column accepts names a newer node may have written.
+
+Prompts are files in the API repository, one per capability under `resources/prompts/`, and
+`PromptLibrary` is the only thing that builds a prompt for a model call. The version recorded against
+every call is derived from the prompt text rather than maintained beside it — `lead-parse@<16 hex of
+the sha256>` — so editing the words without changing the identifier is not possible, and a call log row
+traces to the bytes a reviewer approved. `resources/prompts/manifest.json` is checked in and rewritten
+by `php artisan ai:prompt-manifest`; a test fails when it disagrees with the files, which is what makes
+a prompt edit show up in review as a version change rather than only as an edited paragraph.
+
+A capability reaches a customer only once it has been measured. `resources/evals/{capability}.json`
+holds the labelled cases and, beside each one, the checks a good answer satisfies — field values for an
+extraction capability, forbidden phrases and lengths for a drafting one — so what is being asserted is
+readable next to what it is asserted about. `php artisan ai:eval --record` runs a set through the model
+the capability is configured with and writes the score into `resources/evals/baselines.json` alongside
+the prompt version and the model that produced it, which is what makes two runs comparable when either
+moves.
+
+`EvalGate` is the part CI runs, and it calls no model: a scored run needs a key, costs money and does
+not answer the same way twice. It asks only about capabilities that name a model in configuration —
+an unconfigured one refuses its first call and cannot reach anybody — and blocks one that has no
+labelled set, has never been evaluated, was last evaluated against a prompt version that has since
+changed, or scored below the floor. Giving a capability a model without recording a baseline for the
+prompt it ships with therefore fails the build.
+
+Causation is ambient rather than threaded. `App\Support\Timeline\CausationContext::within()` marks a
+block as reacting to a named event; any append inside it that does not name its own cause inherits
+that one, and the correlation follows. The store is the framework's context, so the queue carries it
+into the job payload and restores it on the worker — which is where the second half of most chains
+happens — and it is cleared between requests rather than surviving on a reused Octane worker. A cause
+the caller names on the DTO always wins over the ambient one. An event that names no organisation is
+refused rather than written, because a fact with no tenant is one no later reader can scope.
+
+`SeatLimitResolver` answers how many seats one organisation's plan allows, and `null` where the plan
+does not meter them at all. It is what keeps the membership side from reading a subscription: the
+count of occupied seats is the organisations module's own question, the ceiling is billing's, and
+`SeatGuard` is the only place the two meet. Asked at acceptance and reactivation — the moments
+somebody would take a seat — never when an invitation is written, because a plan can fill up or empty
+out in between. Until there are plans to read, the bound implementation returns `null` for every
+organisation; it is the one resolver in the tree that deliberately does not fail closed, because a
+closed default with no subscription table would refuse every member anyone ever added.
+
+Signup announces its verification code rather than delivering it. `SignupCodeIssued` carries the
+signup id, the channel, the identifier, the plaintext code and its expiry; which transport carries
+it, and whether that is queued, is the delivery layer's decision and not the signup's. The plaintext
+lives on the event and nowhere else — it is never persisted and never returned in a response, so a
+listener is the only thing that can ever read it.
 
 ### SN-ARCH-003 — Four deployables
 
@@ -198,6 +275,21 @@ S3-compatible, per-tenant key prefixes, server-side encryption, presigned upload
 lifecycle rules for temporary artefacts (exports at 24 h, import files at 7 days).
 
 **Buckets are never public.** Delivery is via CDN with signed or opaque URLs.
+
+The port an adapter answers is `App\Contracts\Platform\StorageProviderInterface`:
+
+| Method | Contract |
+|---|---|
+| `presignedUploadUrl($key, $expiresIn)` | A URL the client may PUT to, expiring within 15 minutes. |
+| `presignedDownloadUrl($key, $expiresIn, $contentDisposition)` | The disposition is signed into the URL, so a holder of the link cannot swap `attachment` for one that renders. |
+| `readPrefix($key, $bytes)` | The object's leading bytes, answered to the application, for checking a declared content type against the file. Bounded — never a download. |
+| `delete($key)` | |
+
+Uploads are refused at two points: `UploadGuard::assertSignable()` judges the name, the declared
+type and the size before a byte moves, and `UploadGuard::assertStoredContentMatches()` holds the
+declaration against the stored bytes afterwards. `AssetUrlFactory` mints every download URL, forces
+`Content-Disposition: attachment` for anything but an image, and refuses a URL minted on the
+application's own origin. Reasoned in [ADR-0035](adr/0035-the-storage-port-reads-a-prefix-and-signs-the-disposition.md).
 
 ---
 

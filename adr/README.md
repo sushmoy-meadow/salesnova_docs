@@ -57,3 +57,30 @@ Status · Date · Deciders
 | [0031](0031-one-queue-holds-both-reasons-to-stop.md) | One queue holds both reasons to stop, a confirmation is a type, and prompts are refused rather than redacted | Accepted |
 | [0032](0032-the-invite-preview-names-the-inviter-without-their-address.md) | The invite preview names the inviter without their address | Accepted |
 | [0033](0033-invite-preview-is-a-posted-token.md) | The invite screen reads its invitation by posting the token | Accepted |
+| [0034](0034-the-signup-screens-hold-their-state-in-a-cookie-and-their-failures-in-the-url.md) | The signup screens hold their state in a cookie and their failures in the URL | Accepted |
+| [0035](0035-the-storage-port-reads-a-prefix-and-signs-the-disposition.md) | The storage port reads a prefix, and the disposition is signed rather than requested | Accepted |
+| [0036](0036-the-token-layer-deletes-the-values-it-does-not-want.md) | The token layer deletes the Tailwind values it does not want, and spacing is keyed by pixels | Accepted |
+| [0037](0037-the-contract-registry-is-a-compile-error-and-the-pointer-states-are-not-props.md) | The component contract registry is a compile error, and the pointer states are a precedence function rather than props | Accepted |
+| [0038](0038-a-wall-is-named-by-why-it-is-shut-and-an-error-surface-always-has-a-way-out.md) | A wall is named by why it is shut, an error surface always has a way out, and the page behind an overlay is owned by one stack | Accepted |
+| [0039](0039-the-platform-is-the-headless-primitive-everywhere-it-has-one.md) | The platform is the headless primitive everywhere it has one, and only the combobox is written by hand | Accepted |
+| [0040](0040-the-touch-target-is-a-pseudo-element-and-a-class-name-is-never-computed.md) | The touch target is a pseudo-element rather than padding, and a class name is never computed | Accepted |
+| [0041](0041-the-placeholder-and-the-table-are-one-frame.md) | The placeholder and the table render through one frame, and the row height is fixed | Accepted |
+| [0042](0042-a-chart-is-svg-we-draw-and-a-table-nobody-can-skip.md) | A chart is SVG we draw, and a table nobody can skip | Accepted |
+| [0043](0043-a-tenant-table-may-be-scoped-by-its-service-if-it-says-so.md) | A tenant table may be scoped by its service, if its model says so | Accepted |
+| [0044](0044-the-live-region-is-in-the-page-before-there-is-anything-to-say.md) | The live region is in the page before there is anything to say, and there is one focus ring | Accepted |
+| [0045](0045-attribution-is-a-server-written-cookie-and-the-window-closes-server-side.md) | Attribution is a server-written cookie, and the window closes server-side | Accepted |
+| [0046](0046-the-seat-is-taken-at-acceptance-and-the-plan-is-asked-then.md) | The seat is taken at acceptance, and the plan is asked then | Accepted |
+| [0047](0047-causation-is-ambient-because-a-parameter-gets-dropped-at-the-boundary.md) | Causation is ambient, because a parameter gets dropped at the boundary | Accepted |
+| [0048](0048-the-breakpoint-is-a-css-variant-and-javascript-never-measures-the-window.md) | The breakpoint is a CSS variant, and JavaScript never measures the window | Accepted |
+| [0049](0049-a-deep-link-refusal-is-data-and-the-way-out-is-part-of-the-reason.md) | A deep-link refusal is data, and the way out is part of the reason | Accepted |
+| [0050](0050-the-request-names-its-own-tier-and-the-money-step-is-a-machine.md) | The request names its own tier, and the money step is a machine | Accepted |
+| [0051](0051-one-gate-decides-whether-ai-may-be-offered-and-off-hides-while-down-disables.md) | One gate decides whether AI may be offered, and off hides while down disables | Accepted |
+| [0052](0052-motion-is-one-rung-and-a-test-is-what-stops-a-second-one-appearing.md) | Motion is one rung, and a test is what stops a second one appearing | Accepted |
+| [0053](0053-the-server-sends-the-instant-and-the-reader-owns-the-zone.md) | The server sends the instant, and the reader owns the zone | Accepted |
+| [0054](0054-a-story-is-indexed-statically-so-the-coverage-test-cannot-be-the-only-gate.md) | A story is indexed statically, so the coverage test cannot be the only gate | Accepted |
+| [0055](0055-a-403-cannot-be-sold-to-because-there-is-nothing-to-build-the-offer-from.md) | A 403 cannot be sold to, because there is nothing to build the offer from | Accepted |
+| [0056](0056-the-off-switch-is-enforced-at-the-only-door-and-the-circuit-is-shared.md) | The off-switch is enforced at the only door, and the circuit is shared | Accepted |
+| [0057](0057-three-deviations-from-the-company-bible-and-why-each-one-stands.md) | Three deviations from the company bible, and why each one stands | Accepted |
+| [0058](0058-a-capability-that-narrows-is-not-a-grant-and-no-preset-switches-it-on.md) | A capability that narrows is not a grant, and no preset switches it on | Accepted |
+| [0059](0059-an-unread-field-is-refused-and-an-identifier-is-the-only-thing-glued-into-sql.md) | An unread field is refused, and an identifier is the only thing glued into SQL | Accepted |
+| [0060](0060-html-is-cleaned-by-the-column-and-the-policy-is-written-once.md) | HTML is cleaned by the column, and the policy is written once | Accepted |
