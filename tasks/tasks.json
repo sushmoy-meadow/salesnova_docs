@@ -4534,7 +4534,7 @@
       "track": "backend",
       "domain": "TL",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Migration + model for timeline_event per F05 sections 1-3: origin enum (MANUAL/SYSTEM/WHATSAPP/INTEGRATION per SN-TL-002), the full type taxonomy in SN-TL-003 (lifecycle/response/manual/content/whatsapp/sequence/campaign/follow-up/acquisition categories), editable-flag distinguishing MANUAL entries (editable) from SYSTEM/WHATSAPP/INTEGRATION entries (never editable, SN-TL-013), pin flag (SN-TL-014), attachment support (up to 5 per activity, 10MB each, SN-TL-012), and occurred_at distinct from created_at to support backdating with a logged-on display (SN-TL-011). Partition the table monthly on occurred_at (SN-TL-020, F05 section 6).",
       "spec_refs": [
         "SN-TL-001..005",
