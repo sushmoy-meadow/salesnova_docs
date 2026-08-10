@@ -2,5 +2,9 @@
 # otherwise be a conflict, so it is built locally rather than committed.
 /tasks/graph.html
 
+# Snapshots taken before a bulk backlog rewrite. Git history already holds the
+# previous state, so these are working copies and never get committed.
+/tasks/tasks.json.bak-*
+
 .DS_Store
 Thumbs.db

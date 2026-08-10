@@ -7,7 +7,15 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '..', 'tasks.json');
-const VALID_STATUSES = ['pending', 'in_progress', 'done'];
+const VALID_STATUSES = ['pending', 'in_progress', 'done', 'deferred'];
+
+// Statuses that take a task out of the active plan entirely. `deferred` is work
+// pulled off the critical path and scheduled after feature development;
+// `merged` is a tombstone whose content now lives in another task's slice.
+// Neither is set through `status` - `merged` is written by the slice merge, and
+// both are excluded from progress percentages and from the blocked list.
+const PARKED_STATUSES = ['deferred', 'merged'];
+const isParked = (t) => PARKED_STATUSES.includes(t.status);
 
 function load() {
   const raw = fs.readFileSync(DATA_FILE, 'utf8');
@@ -29,7 +37,9 @@ function isReady(task, map) {
   if (task.blocked_reason) return false;
   return task.depends_on.every((depId) => {
     const dep = map.get(depId);
-    return dep && dep.status === 'done';
+    // A parked dependency is not something we are waiting for: deferred work was
+    // deliberately taken off the critical path, so it must not gate readiness.
+    return dep && (dep.status === 'done' || isParked(dep));
   });
 }
 
@@ -404,7 +414,7 @@ function cmdShow(data, id) {
 
 function cmdStatus(data, id, newStatus, opts = {}) {
   if (!id || !newStatus) {
-    console.error('Usage: status <TASK-ID> <pending|in_progress|done>');
+    console.error('Usage: status <TASK-ID> <pending|in_progress|done|deferred>');
     process.exitCode = 1;
     return;
   }
@@ -412,6 +422,14 @@ function cmdStatus(data, id, newStatus, opts = {}) {
     console.error(`Invalid status "${newStatus}". Must be one of: ${VALID_STATUSES.join(', ')}`);
     process.exitCode = 1;
     return;
+  }
+  {
+    const existing = byId(data).get(id);
+    if (existing && existing.status === 'merged') {
+      console.error(`${id} was merged into ${existing.merged_into}. Set the status on that task instead.`);
+      process.exitCode = 1;
+      return;
+    }
   }
   const map = byId(data);
   const t = map.get(id);
@@ -433,8 +451,21 @@ function cmdStatus(data, id, newStatus, opts = {}) {
     t.owner = actor;
   }
 
+  if (newStatus === 'done') {
+    const bad = residualGate(t);
+    if (bad.length) {
+      console.error(`${id} cannot be marked done - ${bad.length} residual(s) are not properly recorded:`);
+      for (const b of bad) console.error(`  ${b}`);
+      console.error(`\nEvery residual needs a type (${RESIDUAL_TYPES.join(' | ')}), and a`);
+      console.error(`blocked_on_unbuilt residual needs a closes_when naming the task that closes it.`);
+      console.error(`Debt that names no owner is debt nobody closes. Pass --force to override.`);
+      if (!opts.force) { process.exitCode = 1; return; }
+    }
+  }
+
   const prev = t.status;
   t.status = newStatus;
+  const autoClosed = newStatus === 'done' ? closeResidualsSatisfiedBy(data, id) : [];
   save(data);
   console.log(`${id}: ${prev} -> ${newStatus}${t.owner ? `  @${ownerOf(t)}` : ''}`);
   if (newStatus === 'done') {
@@ -443,13 +474,104 @@ function cmdStatus(data, id, newStatus, opts = {}) {
       console.log(`\nNewly unblocked:`);
       for (const nt of nowReady) console.log(`  ${nt.id}  [${nt.track}]  ${nt.title}`);
     }
+    if (autoClosed.length) {
+      console.log(`\nResiduals closed by this (every task they were waiting on is now done):`);
+      for (const r of autoClosed) console.log(`  ${r.id}  ${r.text.slice(0, 88)}`);
+    }
+    const stillOpen = (t.residuals || []).filter((r) => r.status === 'open');
+    if (stillOpen.length) {
+      console.log(`\n${id} carries ${stillOpen.length} open residual(s) - they outlive this task:`);
+      for (const r of stillOpen) console.log(`  [${r.type}] ${r.id}${r.closes_when.length ? ' -> ' + r.closes_when.join(', ') : ''}`);
+    }
   }
+}
+
+// ---- Residuals -------------------------------------------------------------
+// A residual is a known shortfall recorded against a task that was otherwise
+// completed. Keeping them on the task, rather than spawning a follow-up task
+// each, stops a 160-item debt list from doubling the size of the backlog - but
+// only works if the CLI refuses to let one be recorded without a fate.
+const RESIDUAL_TYPES = ['blocked_on_unbuilt', 'deferred_verification', 'decision_needed', 'spec_defect', 'known_gap'];
+
+function residualGate(t) {
+  const bad = [];
+  for (const r of t.residuals || []) {
+    if (r.status !== 'open') continue;
+    if (!r.type || !RESIDUAL_TYPES.includes(r.type)) bad.push(`${r.id}: missing or unknown type "${r.type}"`);
+    else if (r.type === 'blocked_on_unbuilt' && !(r.closes_when || []).length) bad.push(`${r.id}: blocked_on_unbuilt with no closes_when`);
+  }
+  return bad;
+}
+
+// When a task goes done, any residual anywhere that was waiting only on tasks
+// which are now all done closes itself. This is the whole reason the largest
+// category never became a backlog item.
+function closeResidualsSatisfiedBy(data, doneId) {
+  const map = byId(data);
+  const closed = [];
+  for (const t of data.tasks) {
+    for (const r of t.residuals || []) {
+      if (r.status !== 'open' || r.type !== 'blocked_on_unbuilt') continue;
+      if (!(r.closes_when || []).includes(doneId)) continue;
+      const allDone = r.closes_when.every((x) => { const d = map.get(x); return d && d.status === 'done'; });
+      if (allDone) { r.status = 'closed'; r.closed_by = doneId; closed.push(r); }
+    }
+  }
+  return closed;
+}
+
+function cmdResiduals(data, opts) {
+  const rows = [];
+  for (const t of data.tasks) {
+    for (const r of t.residuals || []) {
+      if (opts.all !== true && r.status !== 'open') continue;
+      if (opts.type && r.type !== opts.type) continue;
+      if (opts.domain && t.domain !== opts.domain) continue;
+      if (opts.gate && t.gate !== opts.gate) continue;
+      rows.push({ t, r });
+    }
+  }
+  if (!rows.length) { console.log('No residuals match.'); return; }
+  const map = byId(data);
+  const byType = {};
+  for (const { r } of rows) byType[r.type] = (byType[r.type] || 0) + 1;
+  console.log(`${rows.length} residual(s): ` + Object.entries(byType).map(([k, v]) => `${v} ${k}`).join(', ') + '\n');
+  let last = '';
+  for (const { t, r } of rows.sort((a, b) => (a.r.type + a.t.id).localeCompare(b.r.type + b.t.id))) {
+    if (r.type !== last) { last = r.type; console.log(`\n== ${r.type}`); }
+    const waiting = (r.closes_when || []).map((x) => { const d = map.get(x); return `${x}[${d ? d.status : 'MISSING'}]`; }).join(' ');
+    console.log(`  ${r.id}${r.status === 'closed' ? ' (closed)' : ''}`);
+    console.log(`    ${r.text.slice(0, 150)}`);
+    if (waiting) console.log(`    waiting on: ${waiting}`);
+  }
+}
+
+// A gate cannot be declared exited while a spec defect recorded inside it is
+// still open: that is a requirement nobody has decided, not a task nobody has done.
+function cmdGateExit(data, gate) {
+  if (!gate) { console.error('Usage: gate-exit <G0|G1|G2|G3|G4|G5>'); process.exitCode = 1; return; }
+  const inGate = data.tasks.filter((t) => t.gate === gate && !isParked(t));
+  const unfinished = inGate.filter((t) => t.status !== 'done');
+  const defects = [];
+  for (const t of data.tasks) {
+    for (const r of t.residuals || []) {
+      if (r.status === 'open' && r.type === 'spec_defect' && t.gate === gate) defects.push({ t, r });
+    }
+  }
+  console.log(`${gate}: ${inGate.length - unfinished.length}/${inGate.length} tasks done`);
+  if (defects.length) {
+    console.log(`\n${defects.length} open spec defect(s) recorded in ${gate} - these block the gate:`);
+    for (const { t, r } of defects) console.log(`  ${r.id}  (${t.id})  ${r.text.slice(0, 110)}`);
+  }
+  const ok = !unfinished.length && !defects.length;
+  console.log(`\n${gate} exit: ${ok ? 'CLEAR' : 'BLOCKED'}`);
+  if (!ok) process.exitCode = 1;
 }
 
 function cmdBlocked(data, opts) {
   const map = byId(data);
   const blocked = filterTasks(
-    data.tasks.filter((t) => t.status !== 'done' && !isReady(t, map)),
+    data.tasks.filter((t) => t.status !== 'done' && !isParked(t) && !isReady(t, map)),
     opts
   );
   console.log(`${blocked.length} task(s) not yet ready:\n`);
@@ -466,18 +588,22 @@ function cmdBlocked(data, opts) {
 
 function cmdProgress(data, opts) {
   const groupBy = ['gate', 'track', 'domain'].includes(opts.by) ? opts.by : 'gate';
+  const active = data.tasks.filter((t) => !isParked(t));
   const groups = {};
-  for (const t of data.tasks) {
+  for (const t of active) {
     const key = t[groupBy] || 'unknown';
     if (!groups[key]) groups[key] = { total: 0, done: 0, in_progress: 0 };
     groups[key].total++;
     if (t.status === 'done') groups[key].done++;
     if (t.status === 'in_progress') groups[key].in_progress++;
   }
-  const totalAll = data.tasks.length;
-  const doneAll = data.tasks.filter((t) => t.status === 'done').length;
-  const inProgAll = data.tasks.filter((t) => t.status === 'in_progress').length;
-  console.log(`Overall: ${doneAll}/${totalAll} done (${((doneAll / totalAll) * 100).toFixed(1)}%), ${inProgAll} in progress\n`);
+  const totalAll = active.length;
+  const doneAll = active.filter((t) => t.status === 'done').length;
+  const inProgAll = active.filter((t) => t.status === 'in_progress').length;
+  const deferredAll = data.tasks.filter((t) => t.status === 'deferred').length;
+  const mergedAll = data.tasks.filter((t) => t.status === 'merged').length;
+  console.log(`Overall: ${doneAll}/${totalAll} done (${((doneAll / totalAll) * 100).toFixed(1)}%), ${inProgAll} in progress`);
+  console.log(`Parked:  ${deferredAll} deferred, ${mergedAll} merged into slices (excluded from the figures above)\n`);
   console.log(`By ${groupBy}:`);
   for (const [key, g] of Object.entries(groups).sort()) {
     const pct = ((g.done / g.total) * 100).toFixed(0);
@@ -542,6 +668,26 @@ function cmdValidate(data) {
     }
   }
 
+  const rIds = new Set();
+  for (const t of data.tasks) {
+    for (const r of t.residuals || []) {
+      if (rIds.has(r.id)) { console.log(`DUPLICATE RESIDUAL ID: ${r.id}`); problems++; }
+      rIds.add(r.id);
+      if (!RESIDUAL_TYPES.includes(r.type)) { console.log(`RESIDUAL BAD TYPE: ${r.id} has "${r.type}"`); problems++; }
+      for (const c of r.closes_when || []) {
+        if (!ids.has(c)) { console.log(`RESIDUAL DANGLING closes_when: ${r.id} -> ${c}`); problems++; }
+        else if (map.get(c).status === 'merged') { console.log(`RESIDUAL closes_when POINTS AT TOMBSTONE: ${r.id} -> ${c} (use ${map.get(c).merged_into})`); problems++; }
+      }
+      if (r.status === 'open' && r.type === 'blocked_on_unbuilt' && !(r.closes_when || []).length) {
+        console.log(`RESIDUAL blocked_on_unbuilt WITH NO TARGET: ${r.id}`); problems++;
+      }
+      if (r.status === 'open' && r.type === 'blocked_on_unbuilt' &&
+          (r.closes_when || []).length && r.closes_when.every((c) => map.get(c) && map.get(c).status === 'done')) {
+        console.log(`RESIDUAL MAY BE CLOSEABLE: ${r.id} - every task it waits on is done`);
+      }
+    }
+  }
+
   const color = new Map();
   function dfs(id, stack) {
     color.set(id, 1);
@@ -594,7 +740,11 @@ Commands:
   progress [--by X]       Completion percentage overall and by gate|track|domain (default: gate)
   graph <TASK-ID>         Full ancestor/descendant chain for one task
   depends <ID> on|drop <DEP-ID...>   Add or remove dependency edges; refuses cycles
-  validate                Check for duplicate ids, dangling refs, cycles
+  residuals [--type T]    Open residuals recorded against completed tasks, grouped by type.
+                          --type blocked_on_unbuilt|deferred_verification|decision_needed|
+                                 spec_defect|known_gap   --domain D  --gate G  --all
+  gate-exit <GATE>        Whether a gate can be exited: unfinished tasks + open spec defects
+  validate                Check for duplicate ids, dangling refs, cycles, residual integrity
 
   whoami                  Print the handle every command below will act as
   claim <TASK-ID...>      Put your name on tasks so the other developer sees them taken
@@ -660,6 +810,10 @@ function main() {
       return cmdGraph(data, positional[0]);
     case 'depends':
       return cmdDepends(data, positional, opts);
+    case 'residuals':
+      return cmdResiduals(data, opts);
+    case 'gate-exit':
+      return cmdGateExit(data, positional[0]);
     case 'validate':
       return cmdValidate(data);
     default:

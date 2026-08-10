@@ -12,9 +12,12 @@ Don't hunt through tables for what to build next — run the CLI (§0 below). It
 `description`, `spec_refs` (which point back into the spec tree) and `acceptance_criteria`, checks
 its `depends_on` list is satisfied, and tells you what's actually ready to start right now.
 
-- **[`tasks.json`](tasks.json)** — the canonical, machine-readable, *stateful* list. All 526 tasks,
-  one object each, plus a live `status` (`pending` / `in_progress` / `done`) that the CLI reads and
-  writes. This is the only file you should edit programmatically — everything else in this
+- **[`tasks.json`](tasks.json)** — the canonical, machine-readable, *stateful* list. All 527 rows,
+  one object each, plus a live `status` (`pending` / `in_progress` / `done` / `deferred` / `merged`)
+  that the CLI reads and writes. Of those rows, **328 are the active plan**: 121 were absorbed into
+  backend+frontend slices (`merged`, pointing at `merged_into`) and 78 are `deferred` off the
+  critical path. See [`slice-restructure.md`](slice-restructure.md) for what changed and why.
+  This is the only file you should edit programmatically — everything else in this
   directory is derived from it (or from its unstated predecessor, `_work/final-tasks.jsonl`) and
   will drift if you hand-edit a gate file instead.
 - **[`cli/tasks.js`](cli/tasks.js)** — zero-dependency Node CLI over `tasks.json`. See §0. The
@@ -34,9 +37,9 @@ its `depends_on` list is satisfied, and tells you what's actually ready to start
   draft of this DAG, and an honest accounting of what's fixed, accepted, or still open in the
   version you're looking at now.
 
-**Final count: 526 tasks across 29 domains.** (AGCY, AI, ANL, ARCH, AUTH, BILL, CAMP, CONT, DATA,
-DESIGN, FIELD, FORM, FUP, GROUP, HARDEN, INFRA, INTG, LEAD, NOTIF, PERM, RULE, SEC, SEQ, SET,
-SHARE, TEAM, TL, UX, WA.)
+**Final count: 328 active tasks across 29 domains** — 527 rows, less 121 merged into slices and 78
+deferred. The domains are AGCY, AI, ANL, ARCH, AUTH, BILL, CAMP, CONT, DATA, DESIGN, FIELD, FORM,
+FUP, GROUP, HARDEN, INFRA, INTG, LEAD, NOTIF, PERM, RULE, SEC, SEQ, SET, SHARE, TEAM, TL, UX, WA.
 
 ---
 
@@ -69,7 +72,7 @@ diagrams), not for tracking progress.
 |---|---|
 | `next` | Lists tasks ready to start now — all `depends_on` satisfied, not blocked. Supports `--track`/`--domain`/`--gate` filters. |
 | `show <TASK-ID>` | Full detail: description, spec refs, live dependency status per dep, acceptance criteria. |
-| `status <TASK-ID> <pending\|in_progress\|done>` | Sets status; on transition to `done`, prints which tasks just became unblocked. |
+| `status <TASK-ID> <pending\|in_progress\|done\|deferred>` | Sets status; on transition to `done`, prints which tasks just became unblocked. Refuses a `merged` row and names the slice to use instead. |
 | `blocked` | Lists not-yet-ready tasks and exactly what each is waiting on (plus `blocked_reason` if set). Supports the same filters as `next`. |
 | `progress [--by gate\|track\|domain]` | Overall % done plus a breakdown by the chosen grouping (default `gate`). |
 | `graph <TASK-ID>` | Full ancestor chain (must-finish-before) and descendant chain (blocked-on-this) for one task. |
@@ -94,9 +97,60 @@ isn't enough context.
 |---|---|
 | `backend` | Server-side: schema/migrations, API contracts, business logic. |
 | `frontend` | Client-side UI: components, pages, flows. |
+| `fullstack` | A **slice**: backend logic and the UI that renders it, as one deliverable. Its first acceptance criterion is always a demo — the slice is not done until a person can exercise it in a browser against the live implementation. Introduced 2026-08-10; see [`slice-restructure.md`](slice-restructure.md). |
 | `qa` | Integration/closure work — wiring a domain's frontend to its live backend end-to-end, or a dedicated verification pass (e.g. "QA: verify search performance"). Not a separate testing phase bolted on after the fact; it's the task that proves the rest of the domain actually works together. |
 | `infra` | Deployment, CI/CD, queues, storage, environments — work that isn't scoped to one product domain. |
 | `design` | Design-system components and visual foundations shared across domains. |
+
+## 2a. Residuals — debt recorded on the task that created it
+
+A task can be finished and still leave something behind: an endpoint it called that answers 501, an
+assertion it could only make in jsdom, a decision it took without asking. 42 of the first 51
+completed tasks shipped exactly that, written up in a `TASK-*-open-points.md` file next to this
+README. Those files were unlinked from the DAG, so ~160 known shortfalls were invisible to `next`,
+`blocked` and `progress`.
+
+They now live on the task itself, in a `residuals` array:
+
+```jsonc
+"residuals": [
+  { "id": "R-TASK-AUTH-016.1",
+    "type": "blocked_on_unbuilt",
+    "status": "open",
+    "text": "Every signup endpoint answers 501 — ...",
+    "closes_when": ["TASK-AUTH-010", "TASK-AUTH-021", "TASK-ARCH-021"],
+    "source": "TASK-AUTH-016-open-points.md" }
+]
+```
+
+They are deliberately **not** separate tasks. One residual per row would have added ~160 rows to a
+backlog whose size is already the problem, and most of that would be double-counting: 30 residuals
+say "this was never checked in a real browser", which is one harness (`TASK-DESIGN-023`), not 30
+pieces of work — and the largest category closes itself when a dependency lands.
+
+| `type` | What it is | How it closes |
+|---|---|---|
+| `blocked_on_unbuilt` | Waiting on a task that does not exist yet | **Automatically**, when every task in `closes_when` is `done` |
+| `deferred_verification` | Asserted structurally, never observed | By the harness in `closes_when` (`TASK-DESIGN-023`) |
+| `decision_needed` | A human has to choose; usually becomes an ADR | By recording the decision |
+| `spec_defect` | The spec is wrong or contradicts itself | By fixing the spec — **blocks its gate** |
+| `known_gap` | An implementation shortfall owned by no other task | By writing the code, or by promotion to a task |
+
+**Promotion rule:** a residual becomes a real task only when it blocks another task's acceptance
+criteria, or when it survives its parent's gate. Until then it stays where the person who found it
+put it.
+
+The CLI enforces this so the array cannot rot:
+
+- `status <id> done` is **refused** if any open residual lacks a valid `type`, or is
+  `blocked_on_unbuilt` with an empty `closes_when`. Debt that names no owner is debt nobody closes.
+  (`--force` overrides, and prints what is being carried forward.)
+- Marking a task `done` **auto-closes** every `blocked_on_unbuilt` residual anywhere whose
+  `closes_when` tasks are now all done, and reports them.
+- `gate-exit <GATE>` fails while an open `spec_defect` is recorded in that gate.
+- `validate` catches dangling `closes_when`, tombstoned targets, duplicate residual ids, and
+  residuals that are already closeable because everything they wait on is done.
+- `residuals [--type T] [--domain D] [--gate G] [--all]` lists them.
 
 ## 3. Gate legend — and what `gate` is *not*
 
