@@ -577,7 +577,7 @@
       "track": "frontend",
       "domain": "ARCH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the global search field in the header per 03-information-architecture.md section 7: Cmd+K/Ctrl+K shortcut, results grouped and ordered leads -> content -> sequences -> team members, recent-items as a zero-query state. Must render first results within the 200ms p95 budget from the backend and must never reveal the existence of a lead the caller cannot view (permission-scoped results only).",
       "spec_refs": [
         "SN-ARCH-015",
@@ -3652,7 +3652,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Migrations + models for onboarding_screen_definition (seed data: screen_key, order, fields jsonb, skippable) and onboarding_progress (membership_id, current_screen_key, answers jsonb, completed_at) per SN-AUTH-030..033; activation_task_definition (seed data: key, label, description, route, cta_label, estimated_seconds, order - the 7 tasks in SN-AUTH-041) and activation_checklist_state (organization_id, dismissed_at) per SN-AUTH-040/042. No table stores task-complete as a boolean flip - completion is always derived from live state at read time (see AUTH-13).",
       "spec_refs": [
         "SN-AUTH-030..033",
@@ -3735,7 +3735,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define GET /api/v1/onboarding/screen, POST /api/v1/onboarding/submit, GET /api/v1/activation/tasks, POST /api/v1/activation/dismiss, and the bootstrap.warnings response shape (code, severity, message, action, dismissible, expires_at) per SN-AUTH-030,040,050. Generate typed client contract per SN-ARCH-032.",
       "spec_refs": [
         "SN-AUTH-030..033",
@@ -3759,7 +3759,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement 6-digit code generation, hashed storage, 10-minute TTL, 5-attempt limit then challenge consumed (403 OTP_MAX_ATTEMPTS), server-enforced 15s resend cooldown (429 + Retry-After), request rate limits (5/hour per identifier, 20/hour per IP), Cloudflare Turnstile gate on OTP generation and signup initiation only (never on submission, per SN-AUTH-004), and identical response shape for registered/unregistered identifiers with the existence branch evaluated only after successful verification (SN-AUTH-005). Dispatch of the actual email/SMS MUST run through a queued job (Horizon, per 09-technical-architecture.md SN-ARCH-011) so the HTTP response is not blocked on provider latency.",
       "spec_refs": [
         "SN-AUTH-001..005",
@@ -3783,7 +3783,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Issue 15-minute access tokens and 30-day rotating refresh tokens; on reuse of an already-exchanged refresh token, revoke every token in its family and return 401 (SN-AUTH-006). Implement this on top of Laravel Sanctum per the company architecture bible (docs/meadowkart_backend_architecture_bible_by_claude.md) section 13: the access token is minted with $user->createToken(...) and carries a 15-minute expiry; the refresh token is an opaque, hashed, single-use value stored in refresh_token and delivered in an HttpOnly cookie (the access token is never put in a cookie). The refresh endpoint validates the refresh token, revokes the Sanctum token it previously minted, mints a fresh one, and rotates the chain. Reuse detection revokes the whole family AND every Sanctum token it minted. Implement Google Sign-In ID-token verification. Implement org-picker listing for users with more than 1 active membership and an org-switch endpoint that swaps the active organisation context without a full re-authentication (SN-AUTH-007); the switch mints a new access token scoped to the newly-selected membership rather than mutating server-side state, so it stays correct under Octane.",
       "spec_refs": [
         "SN-AUTH-006",
@@ -3808,7 +3808,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement magic-link minting (one resource id + one action, 7-day default expiry / 24h for sensitive actions), single-use consumption for state-changing actions, automatic invalidation when the underlying resource is deleted/revoked, and audit logging of every use with IP and user agent, per SN-AUTH-060. Resolving a link MUST grant access only to the named resource - it MUST NOT create a full session/set-cookie.",
       "spec_refs": [
         "SN-AUTH-060"
@@ -3850,12 +3850,13 @@
         {
           "id": "R-TASK-AUTH-010.1",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "The verification code is announced but not delivered — `SignupService` generates the six digits, stores their hash and dispatches `SignupCodeIssued`.",
           "closes_when": [
             "TASK-AUTH-007"
           ],
-          "source": "TASK-AUTH-010-open-points.md"
+          "source": "TASK-AUTH-010-open-points.md",
+          "closed_by": "TASK-AUTH-007"
         },
         {
           "id": "R-TASK-AUTH-010.2",
@@ -3921,12 +3922,13 @@
         {
           "id": "R-TASK-AUTH-011.1",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "The invitation link is never sent anywhere — `issue()` and `resend()` mint a plaintext token and return it on `IssuedInvitationDTO`; the stored row keeps only the hash.",
           "closes_when": [
             "TASK-AUTH-007"
           ],
-          "source": "TASK-AUTH-011-open-points.md"
+          "source": "TASK-AUTH-011-open-points.md",
+          "closed_by": "TASK-AUTH-007"
         },
         {
           "id": "R-TASK-AUTH-011.2",
@@ -4039,7 +4041,7 @@
       "track": "frontend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Build /login (Google button above the fold, email/phone toggle), /login/verify as its own refresh-safe route (not client-side step state, per F01 section 8), and /login/organizations shown only when the user has more than 1 active membership. Use design-system components per 07-design-system.md.",
       "spec_refs": [
         "SN-AUTH-002",
@@ -4809,7 +4811,7 @@
       "track": "frontend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Build /leads/grid: wide, column-configurable spreadsheet-style view restricted to lg breakpoint and above, with column order/visibility persisted per member and custom fields appearing automatically as available columns (SN-LEAD-013). Implement inline editing of assignee, stage, groups, follow-up date, notes and any custom field as independent PATCH calls per cell; a failing cell reverts only itself with an inline error while other pending edits persist (SN-LEAD-014). Below lg, redirect to /leads/table with a one-time notice.",
       "spec_refs": [
         "SN-LEAD-010",
@@ -4834,7 +4836,7 @@
       "track": "frontend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Build the four system-view tabs (All leads, Uncontacted, Follow-ups, Recently active) with count badges from meta.counts (SN-LEAD-012), custom saved-view creation with an org-visible option for managers (SN-LEAD-011), and a filter builder covering the full surface in SN-LEAD-081 that serialises active filters into the URL (SN-LEAD-082).",
       "spec_refs": [
         "SN-LEAD-011",

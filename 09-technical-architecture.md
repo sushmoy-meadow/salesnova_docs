@@ -367,12 +367,20 @@ WhatsAppChannelProviderInterface   app/Contracts/Messaging       providers.whats
 PaymentProviderInterface           app/Contracts/Billing         providers.payment
 NotificationChannelInterface       app/Contracts/Notifications   providers.notification
 StorageProviderInterface           app/Contracts/Platform        providers.storage
+GoogleIdentityVerifierInterface    app/Contracts/Auth            providers.google_identity
 LlmProviderInterface               app/Contracts/Ai              providers.llm
 LeadSourceParserInterface          app/Contracts/Acquisition     not container-bound
 ```
 
 `Ai` is a twelfth namespace segment beyond the eleven modules SN-ARCH-002 lists, added here because
-the AI substrate is its own spec document and its own backlog domain.
+the AI substrate is its own spec document and its own backlog domain. `Auth` sits outside the module
+list for the same reason every other auth namespace does — it is crossed by all of them.
+
+`GoogleIdentityVerifierInterface` is the one port a controller reaches on an unauthenticated route,
+and it is taken as a method dependency rather than a constructor one: a constructor dependency is
+resolved whenever the controller class is, including by the tooling that reads controllers to
+generate the API document, so a deployment naming no Google adapter could not produce a contract for
+any endpoint at all.
 
 `LeadSourceParserInterface` is the one port with no configured driver. Which parser runs depends on
 the source a payload arrived from, so several are live at once and a single container binding would

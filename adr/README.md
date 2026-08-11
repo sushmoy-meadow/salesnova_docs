@@ -85,3 +85,9 @@ Status · Date · Deciders
 | [0059](0059-an-unread-field-is-refused-and-an-identifier-is-the-only-thing-glued-into-sql.md) | An unread field is refused, and an identifier is the only thing glued into SQL | Accepted |
 | [0060](0060-html-is-cleaned-by-the-column-and-the-policy-is-written-once.md) | HTML is cleaned by the column, and the policy is written once | Accepted |
 | [0061](0061-lead-query-boundaries-and-phone-fallback.md) | Lead queries reject unavailable predicates and use a bounded phone fallback | Accepted |
+| [0062](0062-a-verified-identifier-is-an-account-and-the-two-otp-ceilings-both-hold.md) | A verified identifier is an account, and both OTP ceilings hold | Accepted |
+| [0063](0063-the-onboarding-sequence-is-rows-so-its-keys-cannot-be-enums.md) | The onboarding sequence is rows, so its keys cannot be enums | Accepted |
+| [0064](0064-the-code-step-is-a-route-and-the-session-is-a-cookie-the-page-cannot-read.md) | The code step is a route, and the session is a cookie the page cannot read | Accepted |
+| [0065](0065-the-refresh-chain-remembers-the-organisation-and-a-reuse-ends-the-family.md) | The refresh chain remembers the organisation, and a reuse ends the family | Accepted |
+| [0066](0066-search-results-come-from-the-response-and-nothing-a-browser-holds-is-a-result.md) | Search results come from the response, and nothing a browser holds is a result | Accepted |
+| [0067](0067-a-magic-link-grants-one-action-and-the-action-decides-how-long-it-lives.md) | A magic link grants one action, and the action decides how long it lives | Accepted |
