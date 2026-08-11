@@ -195,6 +195,19 @@ function cmdNext(data, opts) {
     ? resolveOwner(opts)
     : (opts.owner && opts.owner !== true ? normaliseOwner(opts.owner) : null);
 
+  // Both flags mean "filter to a person", so an unresolved handle has to stop
+  // here. Falling through would silently widen the list to the whole ready set -
+  // and an unattended /build-task reads the top line of that and starts building
+  // whatever has the most fan-out, which is exactly the work nobody assigned.
+  if ((opts.mine || opts.claimed) && !owner) {
+    console.error(
+      `next --${opts.claimed ? 'claimed' : 'mine'} needs a handle, and none resolved.\n` +
+        'Set SALESNOVA_DEV, pass --as <handle>, or run from a checkout with git config user.name.'
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   // --claimed is your assignment and nothing else. --mine and --owner also keep
   // unclaimed tasks, because those answer "what may I pick up" rather than
   // "what did we agree I would build".
