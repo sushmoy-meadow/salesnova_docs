@@ -84,3 +84,4 @@ Status · Date · Deciders
 | [0058](0058-a-capability-that-narrows-is-not-a-grant-and-no-preset-switches-it-on.md) | A capability that narrows is not a grant, and no preset switches it on | Accepted |
 | [0059](0059-an-unread-field-is-refused-and-an-identifier-is-the-only-thing-glued-into-sql.md) | An unread field is refused, and an identifier is the only thing glued into SQL | Accepted |
 | [0060](0060-html-is-cleaned-by-the-column-and-the-policy-is-written-once.md) | HTML is cleaned by the column, and the policy is written once | Accepted |
+| [0061](0061-lead-query-boundaries-and-phone-fallback.md) | Lead queries reject unavailable predicates and use a bounded phone fallback | Accepted |

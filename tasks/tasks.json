@@ -6,7 +6,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "SUPERSEDED LAYOUT - do NOT create app/Domains/*. The repository is already bootstrapped on the company architecture bible (docs/meadowkart_backend_architecture_bible_by_claude.md) section 1, which mandates responsibility-first top-level directories (Actions, Channels, Console, Constants, Contracts, DTOs, Enums, Events, Exceptions, Exports, Filters, Helpers, Http, Imports, Jobs, Listeners, Models, Notifications, Observers, Providers, Rules, Services, Support, Traits, Utils), each carrying {Domain}/ subdirectories. That layout is the company standard and stays. Express the eleven ADR-0008 / SN-ARCH-002 modules (Identity, Leads, Activity, Content, Sharing, Sequences, Automation, Acquisition, Messaging, Billing, Platform) as the {Domain}/ subdirectory axis inside each responsibility directory - i.e. the module name is the SECOND namespace segment (App\\Models\\Leads\\Lead, App\\Services\\Leads\\LeadService, App\\Events\\Leads\\LeadAssigned), not the first. Create that subdirectory skeleton for all eleven modules under Models, Services, Actions, Contracts, DTOs, Enums, Events and Listeners. Add a static-analysis CI rule (Deptrac layers, or a custom PHPStan rule) that resolves a class's module from that second namespace segment and fails the build when one module's code imports another module's Eloquent model directly instead of going through a published domain event or an explicit public service interface in app/Contracts/{Domain}/ (SN-ARCH-002). NOTE the genuine tension this creates: bible section 4's own worked example has CartService importing the Product model across domains, which SN-ARCH-002 and ADR-0008 forbid. SN-ARCH-002 is the tiebreaker for this project - the CI rule is normative and the bible example is not to be copied. This must be captured in the deviation record (TASK-ARCH-036). Stand up the four deployable build targets from 09-technical-architecture.md section 1 SN-ARCH-003: API (Laravel Octane), Web app (Next.js authenticated SPA), Public surface (separate Next.js build, no auth, no CRM bundle), Workers (Laravel Horizon), as separate repo build/deploy configs - confirming the modular-monolith decision (SN-ARCH-001, no microservice extraction) is reflected in a single Laravel codebase with these four build outputs.",
       "spec_refs": [
         "SN-ARCH-001",
@@ -80,7 +80,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "Implement the two pagination modes (offset for leads/content/team, cursor with opaque base64 cursors for timeline/messages/events/activity) per 05-api-design.md section 7, the simple query-param filters (section 8.1), the POST /{resource}/query complex filter contract with max nesting depth 2 and max 20 conditions (section 8.2), and the GET /api/v1/search?q=&types=&limit= contract (section 8.3, 16). Validation must clamp per_page above 200 rather than reject, and report the clamp in meta. This contract defines the shape every list/search endpoint in the product must conform to.",
       "spec_refs": [
         "SN-ARCH-089",
@@ -104,7 +104,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "Implement the Idempotency-Key header contract on all billable/user-visible-artefact-creating POSTs (05-api-design.md section 9): 24h key+response storage, replay returns original response with X-Idempotent-Replay: true, same key + different body returns 409 CONFLICT. Implement If-Match/ETag optimistic concurrency on PATCH: a mismatch returns 409 CONCURRENT_MODIFICATION with the current record. Document which endpoints require the header (lead create, message send, campaign send, share mint, payment, bulk operations) versus which are naturally idempotent (share minting, WhatsApp ingest).",
       "spec_refs": [
         "SN-ARCH-091"
@@ -194,7 +194,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the caching layers from 09-technical-architecture.md SN-ARCH-013: bootstrap payload per membership (5 min TTL, invalidated on mutation), plan constraints/feature flags/integration registry (1 h TTL), permission resolution per membership (5 min TTL, invalidated on change). Every cache key MUST include organization_id - a colliding key is a cross-tenant leak.",
       "spec_refs": [
         "SN-ARCH-013"
@@ -2665,7 +2665,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Migrations + Eloquent models for: user (email, phone_e164, phone_country, google_subject nullable, timezone), otp_challenge (identifier, channel, code_hash, expires_at, attempts, consumed_at), refresh_token_family/refresh_token (rotation chain, revoked_at, family_id for reuse-detection per SN-AUTH-006), magic_link (resource_type, resource_id, action, token_hash, expires_at, single_use, used_at, ip, user_agent per SN-AUTH-060). Add indexes on identifier lookups and unique constraint on (email) / (phone_e164) where present. TOKEN MODEL: Laravel Sanctum is the mandated API authentication mechanism in the company architecture bible (docs/meadowkart_backend_architecture_bible_by_claude.md) section 13/22 and its personal_access_tokens table is already migrated. The 15-minute access token is a Sanctum personal access token with expires_at set; the refresh chain is the custom refresh_token_family/refresh_token pair layered on top of it, NOT a replacement for Sanctum. Configure Sanctum token expiration and schedule sanctum:prune-expired so expired access tokens do not accumulate. Do not introduce JWT. Code MUST NOT persist plaintext OTP or full libphonenumber structures per F01 section 1 and F02 SN-LEAD-004 storage philosophy.",
       "spec_refs": [
         "SN-AUTH-001..006",
@@ -2742,7 +2742,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Define routes, form-request validation, policies and generated-type contracts (per 09-technical-architecture.md SN-ARCH-032) for: OTP request (email/phone), OTP verify, resend, Google Sign-In token exchange, session refresh, org list/switch, magic-link resolve. Responses MUST be identical shape whether or not the identifier is registered (SN-AUTH-005). Error responses use typed codes (403 OTP_MAX_ATTEMPTS, 429 with Retry-After per SN-AUTH-003). This is the contract frontend builds against - no business logic here beyond validation/shape.",
       "spec_refs": [
         "SN-AUTH-001..007",
@@ -3255,7 +3255,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "in_progress",
+      "status": "done",
       "description": "Migration + model for duplicate flagging (flagged_duplicate_of_lead_id or a lead_duplicate_match table), org_preferences.duplicate_policy enum (CREATE_NEW/MERGE_EXISTING/FLAG_FOR_REVIEW, default FLAG_FOR_REVIEW per SN-LEAD-051), and merge-support columns: soft-delete (deleted_at) with 30-day retention window and the full pre-merge state snapshot storage referenced by the LEAD_MERGED event (SN-LEAD-052).",
       "spec_refs": [
         "SN-LEAD-050",
@@ -3301,7 +3301,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "in_progress",
+      "status": "done",
       "description": "Define POST /api/v1/leads/query (single query surface backing both /leads/table and /leads/grid per SN-LEAD-010), GET/POST lead detail endpoints, independent PATCH endpoints per editable cell (assignee, stage, groups, follow-up date, notes, any custom field per SN-LEAD-014), saved-view CRUD, and the response contract requiring meta.counts for all four system views on every list response (SN-LEAD-012). Also define POST /api/v1/leads/{id}/interactions (explicit interaction-log endpoint, SN-LEAD-023) and the search/filter query-param contract (SN-LEAD-080..082). Publish the generated-types contract per 09-technical-architecture.md SN-ARCH-032 - this is the task that unblocks frontend.",
       "spec_refs": [
         "SN-LEAD-010..014",
@@ -3390,7 +3390,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the single query engine behind POST /api/v1/leads/query that serves both the table and grid presentations plus the four system views (All leads, Uncontacted, Follow-ups, Recently active - sorted by last_content_opened_at within 7 days per SN-LEAD-011) and arbitrary saved_filter definitions. Compute meta.counts for all visible views on every response (SN-LEAD-012). Implement phone-tolerant search: normalise the query through libphonenumber so various formatted variants all match the canonical E.164 number (SN-LEAD-080). Support the full filter surface in SN-LEAD-081 and ensure filters serialise to/from URL query params (SN-LEAD-082). Target p95 under 300ms for a 50-row list and under 200ms for search per F02 section 10.",
       "spec_refs": [
         "SN-LEAD-010..013",
@@ -3459,7 +3459,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement contacted as fully derived (no is_contacted column) from the six configurable triggers in SN-LEAD-040, each toggleable via org_preferences with unmark_on_view defaulting OFF. On the first trigger that constitutes outbound contact, set first_response_at (timestamptz, never re-set afterward) and first_response_channel, and emit a FIRST_RESPONSE timeline event (SN-LEAD-041) - this MUST be a timestamp column, never a boolean flag, and MUST NOT be modified once set. Implement new-lead badge source scoping via org_preferences.mark_new_lead_sources (default INTEGRATION/LEAD_FORM/WHATSAPP; manually added leads never get the badge, SN-LEAD-042).",
       "spec_refs": [
         "SN-LEAD-040..042"
@@ -3873,7 +3873,7 @@
       "track": "backend",
       "domain": "FIELD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Migrations + models for custom_field_definition (type: TEXT/NUMBER/DROPDOWN/DATE only per SN-FIELD-001; key immutable once generated, label editable per SN-FIELD-003; system_field flag for seeded LEAD_STAGE/OPPORTUNITY_SIZE which MUST NOT be columns on lead per SN-FIELD-002; autofill_from_source json-path per SN-FIELD-005; reminder_frequency/reminder_offset per SN-FIELD-006; order, color_id, is_terminal, outcome for stage-type fields per SN-FIELD-020), custom_field_value with typed columns (value_text, value_number, value_date, value_option - never a single text blob, SN-FIELD-004), and custom_field_value_history (append-only, SN-FIELD-007). Seed LEAD_STAGE and OPPORTUNITY_SIZE as rows, not code.",
       "spec_refs": [
         "SN-FIELD-001..004",
@@ -4251,7 +4251,7 @@
       "track": "backend",
       "domain": "FUP",
       "gate": "G1",
-      "status": "in_progress",
+      "status": "done",
       "description": "Migration + model for follow_up (lead_id, assigned_membership_id, due_at nullable - NULL means deliberately undated/SOMEDAY per SN-FUP-003, status enum PENDING/COMPLETED, note nullable per SN-FUP-012). Enforce at most one PENDING follow-up per lead with a partial unique index on follow_up(lead_id) where status equals PENDING, exactly as specified in SN-FUP-001.",
       "spec_refs": [
         "SN-FUP-001",
@@ -4274,7 +4274,7 @@
       "track": "backend",
       "domain": "FUP",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define follow-up create/set/complete/snooze endpoints (quick-set shortcuts Today/Tomorrow/In 3 days/Next week/Next month/Someday/Clear per SN-FUP-010), GET /api/v1/follow-ups/counts returning overdue/today/upcoming/someday (SN-FUP-020), and the bucketed list endpoint /follow-ups?bucket=. Publish generated types per SN-ARCH-032 - unblocks frontend.",
       "spec_refs": [
         "SN-FUP-001",
@@ -4322,7 +4322,7 @@
       "track": "backend",
       "domain": "FUP",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement OVERDUE/TODAY/UPCOMING/SOMEDAY as derived (never stored) conditions computed against the members own user.timezone, not the orgs and not UTC, so two members in different timezones see correct and potentially different buckets over the same data (SN-FUP-002, SN-FUP-004). Implement the counts endpoint and default landing on today rather than overdue (SN-FUP-021).",
       "spec_refs": [
         "SN-FUP-002",
@@ -11402,7 +11402,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "Define route, FormRequest validation, policy scaffolding and generated OpenAPI/typed-client contract (SN-ARCH-032) for: GET /audit-log (owner-only, filterable by action/actor/date range), and security-settings read endpoints. Enforce owner-only policy per the four-layer model (SN-SEC-002). This is the contract frontend builds the audit-log viewer against.",
       "spec_refs": [
         "SN-SEC-010",
@@ -11450,7 +11450,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "Implement and wire the four enforcement layers (06-permissions-and-plans.md section 1.6, SN-SEC-002): route middleware, policy, query scope (global organization_id scope), field-level. Ensure a cross-tenant reference returns 404, never 403. Build the tenant-isolation automated test suite (attempt cross-tenant read/write/list across every entity, SN-SEC-003, SN-ARCH-020) and wire it as a blocking CI stage that fails the pipeline on any leak.",
       "spec_refs": [
         "SN-SEC-002",
@@ -11500,7 +11500,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "in_progress",
+      "status": "done",
       "description": "Implement the full rate-limit table (SN-SEC-008): 60 req/min unauthenticated per IP, OTP generation 3/identifier/15min + 10/IP/hour, 600 req/min per authenticated membership, public lead-form submit 5/IP/min + Turnstile, share-viewer tracking 1 report/10s/session, bulk operations 10/member/hour, exports 1/member/hour + 3/org/hour, public API per-plan published in response headers. Implement using the pattern in the company architecture bible (docs/meadowkart_backend_architecture_bible_by_claude.md) section 27: every limit is a named RateLimiter::for() definition registered in a dedicated RateLimitServiceProvider boot method and applied via throttle:{name} middleware on route groups. Rate limiting MUST NOT be implemented inside controllers. Where the bible's illustrative defaults (60/min api, 10/min auth) disagree with the SN-SEC-008 table, SN-SEC-008 wins - it is the project-specific requirement.",
       "spec_refs": [
         "SN-SEC-008",
