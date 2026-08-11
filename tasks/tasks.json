@@ -162,8 +162,7 @@
         "Calling a bulk endpoint's /preview sibling never mutates data and returns the documented preview shape",
         "A bulk operation over 500 records returns 202 with a job_id pollable at /jobs/{job_id}"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-ARCH-009",
@@ -185,8 +184,7 @@
         "A move request is a constant-size relative operation, never a full reordered array",
         "An upload-sign request exceeding the plan's file_max_bytes or an disallowed MIME is rejected before a signed URL is issued"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-ARCH-011",
@@ -207,8 +205,7 @@
         "An export or analytics rollup query executes against the replica connection",
         "A request-path read (e.g. fetching a just-created lead) always executes against the primary connection"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-ARCH-012",
@@ -264,7 +261,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-ARCH-029"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-ARCH-014",
@@ -387,8 +385,7 @@
         "The circuit breaker opens after a configured failure threshold per provider and stops issuing calls until it half-opens",
         "A dead-letter entry triggers an alert, verified in staging"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-ARCH-019",
@@ -2122,7 +2119,8 @@
         "WhatsApp action is visually distinguished from the other three",
         "Channel order/visibility follows the F18 settings contract"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-DESIGN-008",
@@ -3668,7 +3666,7 @@
         "Dismissing the activation checklist persists and survives a new session"
       ],
       "blocked_reason": null,
-      "owner": "sakib"
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-004",
@@ -3753,7 +3751,7 @@
         "activation/tasks response matches the documented JSON shape including completed/total counters"
       ],
       "blocked_reason": null,
-      "owner": "sakib"
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-007",
@@ -3777,7 +3775,7 @@
         "AC-AUTH-005.1"
       ],
       "blocked_reason": null,
-      "owner": "sakib"
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-008",
@@ -3802,7 +3800,7 @@
         "Org switching returns a new membership-scoped access token and never relies on request-persistent server state"
       ],
       "blocked_reason": null,
-      "owner": "sakib"
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-009",
@@ -3824,7 +3822,7 @@
         "Revoking the underlying resource invalidates any outstanding link immediately"
       ],
       "blocked_reason": null,
-      "owner": "sakib"
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-010",
@@ -3977,7 +3975,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-AUTH-018"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-013",
@@ -4005,7 +4004,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-AUTH-019"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-014",
@@ -4030,7 +4030,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-AUTH-020"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-015",
@@ -4315,7 +4316,8 @@
         "A warning condition resolved server-side clears its banner on the next bootstrap without a client-side workaround."
       ],
       "blocked_reason": null,
-      "respec": true
+      "respec": true,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-AUTH-023",
@@ -4457,7 +4459,8 @@
         "import_batch_row stores enough per-row detail to regenerate a corrected-format CSV of only the failed rows",
         "export_job records requester, filter and row_count on every export"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-LEAD-004",
@@ -4524,7 +4527,8 @@
       "acceptance_criteria": [
         "Every bulk mutation route has a corresponding /preview route with an identical filter/selection contract"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-LEAD-007",
@@ -4603,7 +4607,8 @@
         "AC-LEAD-023.1",
         "AC-LEAD-023.2"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-LEAD-010",
@@ -4625,7 +4630,8 @@
       "acceptance_criteria": [
         "Every assignment change is retrievable as both a timeline_event and an event row with previous/new assignee"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-LEAD-011",
@@ -5087,8 +5093,7 @@
       "acceptance_criteria": [
         "The reorder endpoints request schema has no field capable of carrying a full ordered array"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-FIELD-003",
@@ -5596,8 +5601,7 @@
       "acceptance_criteria": [
         "Opening the app to follow-ups lands on the today bucket, never overdue, by default"
       ],
-      "blocked_reason": null,
-      "owner": "sushmoy"
+      "blocked_reason": null
     },
     {
       "id": "TASK-FUP-008",
@@ -10913,8 +10917,7 @@
         "Migrations pass tenant isolation suite",
         "Dedup index enforces no duplicate notification for same event+recipient within 60s"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-NOTIF-002",
@@ -11222,7 +11225,8 @@
       "acceptance_criteria": [
         "A membership or organization with no preferences row still resolves every setting to its documented default, never null"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-SET-002",
@@ -11260,7 +11264,8 @@
         "PATCH of a single settings key applies immediately with no separate save step",
         "A locked user-scoped key is rejected server-side even if the client attempts to write it"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-SET-003",
@@ -12755,8 +12760,7 @@
         "Revoking a family invalidates the associated Sanctum access tokens immediately, verified by an authenticated request failing right after revocation",
         "6th OTP attempt or use after single-use is rejected"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-SEC-006",
@@ -12797,8 +12801,7 @@
         "Integration credential and WhatsApp session columns are unreadable via a raw DB dump without the KMS key",
         "Key rotation runs annually without requiring re-encryption downtime"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-SEC-008",
@@ -13047,8 +13050,7 @@
         "Owner can filter the audit log by action type, actor and date range",
         "Non-owner memberships cannot reach this screen (route-guarded)"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-SEC-017",
@@ -13942,8 +13944,7 @@
         "Design document specifies index-level organization_id filtering, not application-level post-filtering",
         "Design is reviewed and accepted before any V2 retrieval work begins"
       ],
-      "blocked_reason": null,
-      "owner": "sakib"
+      "blocked_reason": null
     },
     {
       "id": "TASK-AI-013",
