@@ -36,6 +36,9 @@ its `depends_on` list is satisfied, and tells you what's actually ready to start
 - **[`audit-report.md`](audit-report.md)** — three independent audits run against an earlier
   draft of this DAG, and an honest accounting of what's fixed, accepted, or still open in the
   version you're looking at now.
+- **[`assign-lanes.md`](assign-lanes.md)** — how the two developers' work is divided (one owns a
+  domain end to end, the other builds the next domain's backend ahead of them) and the procedure
+  for re-cutting it when a domain finishes. The `owner` field in `tasks.json` is its only output.
 
 **Final count: 328 active tasks across 29 domains** — 527 rows, less 121 merged into slices and 78
 deferred. The domains are AGCY, AI, ANL, ARCH, AUTH, BILL, CAMP, CONT, DATA, DESIGN, FIELD, FORM,
