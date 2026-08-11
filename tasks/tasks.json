@@ -4561,7 +4561,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the single query engine behind POST /api/v1/leads/query that serves both the table and grid presentations plus the four system views (All leads, Uncontacted, Follow-ups, Recently active - sorted by last_content_opened_at within 7 days per SN-LEAD-011) and arbitrary saved_filter definitions. Compute meta.counts for all visible views on every response (SN-LEAD-012). Implement phone-tolerant search: normalise the query through libphonenumber so various formatted variants all match the canonical E.164 number (SN-LEAD-080). Support the full filter surface in SN-LEAD-081 and ensure filters serialise to/from URL query params (SN-LEAD-082). Target p95 under 300ms for a 50-row list and under 200ms for search per F02 section 10.",
       "spec_refs": [
         "SN-LEAD-010..013",
@@ -4630,7 +4630,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement contacted as fully derived (no is_contacted column) from the six configurable triggers in SN-LEAD-040, each toggleable via org_preferences with unmark_on_view defaulting OFF. On the first trigger that constitutes outbound contact, set first_response_at (timestamptz, never re-set afterward) and first_response_channel, and emit a FIRST_RESPONSE timeline event (SN-LEAD-041) - this MUST be a timestamp column, never a boolean flag, and MUST NOT be modified once set. Implement new-lead badge source scoping via org_preferences.mark_new_lead_sources (default INTEGRATION/LEAD_FORM/WHATSAPP; manually added leads never get the badge, SN-LEAD-042).",
       "spec_refs": [
         "SN-LEAD-040..042"
@@ -5510,7 +5510,7 @@
       "track": "backend",
       "domain": "FUP",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement OVERDUE/TODAY/UPCOMING/SOMEDAY as derived (never stored) conditions computed against the members own user.timezone, not the orgs and not UTC, so two members in different timezones see correct and potentially different buckets over the same data (SN-FUP-002, SN-FUP-004). Implement the counts endpoint and default landing on today rather than overdue (SN-FUP-021).",
       "spec_refs": [
         "SN-FUP-002",

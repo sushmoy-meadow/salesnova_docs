@@ -68,10 +68,9 @@ registry ahead of the task that owns it.
 `docs/09-technical-architecture.md` puts `timeline_event`, `event` and `audit` in one module named
 `Activity`. Nothing here uses that word: `audit` already shipped under `Security`, so the tree's
 working convention is the domain of the task rather than the module of the spec, and this task is
-`TL`. Recorded rather than silently taken, because `TASK-TL-002` creates `timeline_event` and will
-land in the same namespace — the machine log holding the unqualified name `Event` beside a
-`TimelineEvent` is confusable under any segment name, and that task should confirm or change the
-pair together rather than inherit it.
+`TL`. Confirmed by `TASK-TL-002`: `timeline_event` lives in `App\\Models\\Timeline\\TimelineEvent`,
+keeping the task domain namespace and making the human-readable model distinct from the unqualified
+machine log model `Event`.
 
 ## 4. `id` is not unique on its own
 
