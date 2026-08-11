@@ -762,7 +762,7 @@
       "track": "backend",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "The company architecture bible (docs/meadowkart_backend_architecture_bible_by_claude.md) closes with \"Deviations require explicit justification and team lead approval\". This project takes three, and they need to be written down and approved rather than discovered later by whoever reads the bible and the code side by side. (1) API envelope: 05-api-design.md section 2's {success, data, meta, policy} / {success:false, error:{code, message, details, trace_id}} supersedes bible section 9's bare {data} / {error:{message}}, which explicitly forbids a success boolean. Justification: the dual policy object and the error-code catalogue are load-bearing for permission and plan gating, and 05-api-design.md is normative. See TASK-ARCH-004. (2) Module boundaries: SN-ARCH-002 and ADR-0008 require CI-enforced cross-module boundaries; the bible's section 4 worked example imports an Eloquent model across domains. The CI rule wins. See TASK-ARCH-001. (3) Auth: the 15-minute access / 30-day rotating refresh chain with family reuse-detection is layered on top of Sanctum rather than replacing it, so bible section 13's \"Sanctum for all API authentication\" stays literally true. See TASK-AUTH-008. Additionally, correct the two places that still render the superseded layout. 09-technical-architecture.md SN-ARCH-002 draws the eleven modules as an app/Domains/ tree; the module list and the table-to-module mapping are correct and must be kept, but the tree must be redrawn as the {Domain}/ subdirectory axis so a reader of the spec does not build the wrong structure. And amend ADR-0008 - it currently describes \"eleven domain modules with enforced boundaries\" in a way that reads as app/Domains/*, which is not what shipped. Add a Consequences note recording that modules are the second namespace segment inside the bible's responsibility-first layout, and that boundary enforcement resolves module identity from that segment.",
       "spec_refs": [
         "SN-ARCH-001",
@@ -938,7 +938,7 @@
       "track": "frontend",
       "domain": "PERM",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Build the UI for managing a member's capability grid and role presets per 06-permissions-and-plans.md section 1.1/1.4: named presets (Owner/Manager/Rep) as the default path over Privyr's raw-grid-only approach, with any individual toggle edit flipping the member's role_preset to CUSTOM. Render the ~40 capabilities grouped by the domains in section 1.2 (Leads, Schema/content/engagement, Channels/acquisition, Organisation) with plain-language descriptions.",
       "spec_refs": [
         "SN-PERM-001",
@@ -953,7 +953,8 @@
         "Selecting a preset applies the documented default matrix from section 1.4 in one action",
         "Toggling any single capability after applying a preset flips the displayed role to CUSTOM"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-PERM-008",
@@ -961,7 +962,7 @@
       "track": "frontend",
       "domain": "PERM",
       "gate": "G4",
-      "status": "pending",
+      "status": "done",
       "description": "Build the three wall treatments from 06-permissions-and-plans.md section 3 and 03-information-architecture.md section 6.1: permission wall (403 - control hidden or disabled with tooltip, no CTA, 'Ask your admin'), plan wall (423 - control visible with a lock badge, 'Upgrade' CTA opening a plan comparison modal with the feature pre-selected), flag wall (425 - control visible with a 'Soon' badge, optional waitlist, no CTA). Implement the specific-copy generator (section 3.2) that always names the limit, current usage, tier that lifts it, and what they get, computed from app_constraints plus a live count - never a generic 'Upgrade for more features.' Enforce the frequency rules (section 3.3): at most one interstitial upgrade modal per session, inline lock badges always visible, a dismissed prompt for a feature not reappearing for 7 days, and no upgrade prompt during onboarding or the first session.",
       "spec_refs": [
         "SN-PERM-012",
@@ -978,7 +979,8 @@
         "A 423 response's upgrade copy contains the actual current usage number and limit from live data, not a static string",
         "Dismissing an upgrade prompt suppresses that specific feature's interstitial for 7 days, and no more than one interstitial appears per session"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-PERM-009",
@@ -1303,7 +1305,7 @@
       "track": "design",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the SalesNova design token layer as Tailwind CSS theme configuration per docs/07-design-system.md section 3 (semantic colour tokens), section 4 (typography scale, SN-DS-010..012) and section 5 (spacing/radius/elevation, SN-DS-020..022). Define semantic colour tokens ONLY (--color-primary, --color-primary-hover, --color-primary-subtle, --color-on-primary, --color-accent, --color-success, --color-warning, --color-danger, --color-info, --color-surface, --color-surface-raised, --color-surface-sunken, --color-border, --color-border-strong, --color-text-primary/-secondary/-tertiary/-inverse) as CSS custom properties consumed by Tailwind theme.extend, meeting the contrast rules in section 3.3 (body text 7:1 AAA, large text/UI labels 4.5:1, interactive borders/focus rings 3:1, disabled 3:1). Configure the system font stack (SN-DS-010, no webfont) and type scale (display/h1/h2/h3/body/body-sm/caption/mono per SN-DS-011, minimum body size 15px, weights 400/500/600 only per SN-DS-012). Configure the 4px spacing scale (0,4,8,12,16,20,24,32,40,48,64 per SN-DS-020), radius scale (sm4/md8/lg12/full per SN-DS-021) and four elevation levels with tight radii for shadow performance on low-end Android (SN-DS-022). Structure tokens so a V1.5 dark theme can be added later without restructuring (section 3.5). The green/amber colour direction in section 3.1 is a pending decision (13-open-decisions.md OD-2) - implement token names/structure now; hex values may be swapped later without consumers changing.",
       "spec_refs": [
         "SN-DS-010",
@@ -1329,7 +1331,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Produce the TypeScript prop-API/interface contract (signatures, variant enums, state props) for the full component inventory in docs/07-design-system.md section 6 SN-DS-030: Foundations (Button, IconButton, Input, Textarea, Select, Combobox, DatePicker, TimePicker, Checkbox, Radio, Switch, Chip, Badge, Avatar, Tooltip, Spinner, Skeleton), Layout (Card, Sheet, Modal, Drawer, Tabs, Accordion, Divider, EmptyState, ErrorState, Banner) and Data (Table, Grid, List, ListItem, Pagination, CursorPagination, Filter bar, SearchInput, SavedViewPicker). Every interactive component's contract MUST expose the six mandatory states from SN-DS-031 (default/hover/focus-visible/active/disabled/loading). The Button contract must encode the four variants and per-screen usage rule from SN-DS-032 (primary exactly one/screen, secondary, ghost, danger always confirmed; sizes sm32/md40/lg48; 44x44 minimum touch target). Publish this contract (e.g. generated .d.ts / package) so implementation tasks and consuming feature teams can build in parallel against a stable shape. Do not implement visual styling - contract/types only.",
       "spec_refs": [
         "SN-DS-030",
@@ -1354,7 +1356,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement Input, Textarea, Select, Combobox, DatePicker, TimePicker, Checkbox, Radio, Switch against the D-02 contracts and D-01 tokens, using headless primitives (Radix or equivalent) for accessible behaviour per docs/07-design-system.md SN-DS-080. Each component ships all six states (default/hover/focus-visible/active/disabled/loading, SN-DS-031), uses only semantic tokens (no raw hex/spacing, SN-DS-081), and meets the touch-target/contrast rules from section 3.3/6. focus-visible must work for keyboard-only navigation - it is not optional.",
       "spec_refs": [
         "SN-DS-030",
@@ -1380,7 +1382,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement Button, IconButton, Chip, Badge, Avatar, Tooltip, Spinner, Skeleton against the D-02 contracts and D-01 tokens per docs/07-design-system.md section 6. Button implements the four variants/three sizes/44px touch-target rule of SN-DS-032 exactly (padding compensates size where needed). All six SN-DS-031 states apply to every interactive one of these (Button, IconButton, Tooltip trigger). Skeleton must expose a shape API so it can mirror any real content's layout, consumed later by the SN-DS-042 zero-CLS requirement in D-04/D-05.",
       "spec_refs": [
         "SN-DS-030",
@@ -1405,7 +1407,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement Card, Sheet (bottom sheet, mobile), Modal, Drawer, Tabs, Accordion, Divider, EmptyState, ErrorState, Banner per docs/07-design-system.md section 6 SN-DS-030. EmptyState and ErrorState must implement the mandatory six-state data-surface contract from SN-DS-040 (loading / empty-first-run / empty-filtered / error / partial-degraded / permission-denied-vs-paywalled-vs-not-yet-available, per 03-information-architecture.md section 6-7) as the shared building blocks other domain screens compose. EmptyState must render the three-part teaches structure from SN-DS-041 (what this is / why it is empty / one specific action) - never a bare No data message. ErrorState must implement SN-DS-043 (what failed / why in plain language / what to do / a retry / a small selectable trace_id) - never a generic Something went wrong message. Modal/Sheet/Drawer must respect the motion budget (D-08) and honour prefers-reduced-motion. This task also fulfils the shared six-state UI primitive requirement for loading/empty/error/degraded/permission/paywall treatments across every list and detail surface (merged scope): a 403 response renders a quiet no-CTA treatment, a 423 renders an upgrade modal with plan comparison, and a 425 renders a coming-soon state with no CTA, per 03-information-architecture.md section 6.1.",
       "spec_refs": [
         "SN-DS-030",
@@ -1435,7 +1437,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement Table (sortable, selectable, sticky header), Grid (inline-editable), List, ListItem, Pagination, CursorPagination, Filter bar, SearchInput, SavedViewPicker per docs/07-design-system.md section 6 SN-DS-030 - the dense, high-density surfaces referenced in section 2 principle 3 (e.g. a lead list showing 12+ rows). Each must support the six-state pattern (SN-DS-040) via the EmptyState/ErrorState components from D-04, and each loading Skeleton (from D-03B) MUST mirror the real content's final layout exactly - SN-DS-042 requires zero cumulative layout shift, a hard requirement not a target. Grid's inline-editable cells reuse the form controls from D-03A.",
       "spec_refs": [
         "SN-DS-030",
@@ -1596,7 +1598,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the shared motion/animation utility (duration + easing tokens and a prefers-reduced-motion guard) per docs/07-design-system.md section 8. Durations: micro (hover/press) 100ms, transition (sheet/modal) 200ms, page 250ms, maximum 300ms (SN-DS-050), easing cubic-bezier(0.4,0,0.2,1). Only communicative motion is permitted (a sheet showing its origin, an optimistic row appearing, a state change drawing the eye, SN-DS-051) - entrance animations on lists, parallax, decorative loops and staggered reveals are forbidden because they cost frames on mid-range Android. When prefers-reduced-motion is set, all non-essential motion is disabled and essential feedback becomes an instant state change (SN-DS-052).",
       "spec_refs": [
         "SN-DS-050",
@@ -1621,7 +1623,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the responsive breakpoint shell per docs/07-design-system.md section 9: base <640 (single column, bottom nav, sheets), sm >=640 (wider cards, two-column forms), md >=768 (collapsible sidebar, modals), lg >=1024 (persistent sidebar, table view, grid available), xl >=1280 (max content width 1440, detail panes) - SN-DS-060. Implement mobile bottom navigation (SN-DS-062): Leads / Follow-ups / Inbox / More, labels always visible, badge counts on Follow-ups and Inbox (Follow-ups gets a mobile-only nav slot it does not get on desktop - a deliberate asymmetry). Every core workflow (receive, open, contact, log, follow up) must be fully usable at base; only the spreadsheet grid, bulk operations and rule building are desktop-only, and each must degrade to a clear explanation screen rather than break (SN-DS-061).",
       "spec_refs": [
         "SN-DS-060",
@@ -1647,7 +1649,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the shared accessibility framework per docs/07-design-system.md section 10 SN-DS-070 (WCAG 2.1 AA, with AAA body contrast): keyboard focus management utilities (every action reachable/operable with a visible focus ring), semantic HTML/ARIA helpers for screen readers, a live-region utility for announcing new messages/toasts/count updates, form-field label/error association helpers, and verification that the app is usable at 200% zoom with no horizontal scroll. This framework is consumed by every other component task (D-03A/B, D-04, D-05) and must equally cover public surfaces - the share viewer and lead forms are held to the same accessibility bar as the authenticated app (external: F07 share viewer, F11 lead forms).",
       "spec_refs": [
         "SN-DS-070"
@@ -1720,7 +1722,7 @@
       "track": "design",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Document every component from the SN-DS-030 inventory in Storybook per docs/07-design-system.md SN-DS-082: all states, all props, usage guidance, and accessibility notes for each. A component that is not in Storybook does not exist - this task is the integration point that makes the component library actually consumable by feature teams building against D-02's contracts.",
       "spec_refs": [
         "SN-DS-082"
@@ -1876,7 +1878,7 @@
       "track": "frontend",
       "domain": "UX",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the confirmation pattern system per docs/08-ux-flows.md Cross-cutting rules > Confirmation is proportionate to consequence: reversible+small = toast with undo, no dialog; reversible+large = confirm dialog; irreversible+small = confirm dialog stating the consequence; irreversible+large = type-to-confirm the count or name; actions that spend money = a cost preview screen followed by a confirm step. Built on the Modal/Sheet/Banner components from D-04 (this slice's DESIGN domain).",
       "spec_refs": [
         "SN-UX-013"
@@ -1898,7 +1900,7 @@
       "track": "frontend",
       "domain": "UX",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the deep-link resolver per docs/08-ux-flows.md Cross-cutting rules > Deep links resolve or explain: every deep link (from push notification, email, or share) either resolves to its target screen/state, or renders a specific explanation (deleted, no permission, plan-locked) using the ErrorState component from D-04. Never a blank screen and never a silent redirect to the dashboard with no explanation. This framework underlies the deep-link behaviour required by Flow 2 (lead-arrival notification), Flow 4 (share-open alert) and Flow 9 (reconnection).",
       "spec_refs": [
         "SN-UX-014"
@@ -2881,7 +2883,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the 3-stage signup flow (SN-AUTH-011), server-derived role assignment (OWNER for new org, invite-carried role otherwise - SN-AUTH-012), typed error codes so every failure branch (rate limit, invalid invite, captcha failure) is distinguishable client-side (SN-AUTH-013), and server-side capture of utm_source/utm_medium/utm_campaign/utm_content/gclid/fbclid/referrer/device_type/first_touch_at into user.acquisition with a 15-day first-touch attribution window (SN-AUTH-014).",
       "spec_refs": [
         "SN-AUTH-010..014"
@@ -2904,7 +2906,7 @@
       "track": "backend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "On signup without an invite, auto-create an organisation with OWNER membership and country-derived defaults (currency, timezone, phone country code) per SN-AUTH-020. Implement full invite lifecycle state machine (invite to resend to cancel to accept to active to deactivate to reactivate), hashed token storage, 14-day expiry with resend minting a new token, seat-limit check performed at acceptance time (not invite time) so an invite sent under an old plan fails clearly, and existing-user acceptance creating a second membership without a second user row. Implement deactivation requiring explicit reassignment-or-unassign choice when the member holds assigned leads (SN-AUTH-022). Expose the invitation to the person holding the emailed link: a public, session-less read that resolves a token to the organisation name and the inviter identity, so the acceptance screen can show who is asking before it asks for anything.",
       "spec_refs": [
         "SN-AUTH-020..022"
@@ -3019,7 +3021,7 @@
       "track": "frontend",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Build the server-rendered /signup flow (outside the SPA bundle) covering the 3 stages in SN-AUTH-011, Google signup skipping stage 3, and typed error rendering per field/cause per SN-AUTH-013 (rate limit, invalid invite, captcha failure each render distinctly, never all under the email field).",
       "spec_refs": [
         "SN-AUTH-010..013"
@@ -11564,7 +11566,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Provide a shared schema-validation layer (FormRequest/rule-objects) enforced on every request body, query parameter and webhook payload that rejects unknown fields rather than ignoring them (SN-SEC-006). Add a static-analysis CI gate that fails on any string-concatenated SQL.",
       "spec_refs": [
         "SN-SEC-006"
@@ -11584,7 +11586,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement server-side sanitisation of user-supplied page content against an allowlist at write time (not read time), require review + sanitiser wrapper for any dangerouslySetInnerHTML usage, and configure strict CSP (no inline script, no eval, explicit allowlist) for the public surface plus a documented, shrinking CSP exception list for the authenticated app (SN-SEC-007).",
       "spec_refs": [
         "SN-SEC-007"
@@ -11624,7 +11626,7 @@
       "track": "backend",
       "domain": "SEC",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement upload handling (SN-SEC-006): verify content-type against actual file bytes (not just extension), enforce an extension allowlist, enforce size limits at the signing step, and serve non-renderable types from a separate origin with Content-Disposition: attachment.",
       "spec_refs": [
         "SN-SEC-006"
@@ -12184,7 +12186,7 @@
       "track": "backend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Define the internal service interface (not a public HTTP contract) other domains call to emit events into the event table, plus an internal query API used by tooling (breach-impact, analytics prep), per SN-AI-010.",
       "spec_refs": [
         "SN-AI-010"
@@ -12206,7 +12208,7 @@
       "track": "backend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Wire the event-emission facade into the write paths that must produce events (SN-AI-010/011/015): lead creation/stage change, rule and sequence routing decisions (with their reason), and message send/receive. Ensure correlation_id/causation_id are propagated so 'this message caused that reply which caused that stage change' is reconstructable. Ensure organization_id is set on every emitted event.",
       "spec_refs": [
         "SN-AI-010",
@@ -12341,7 +12343,7 @@
       "track": "backend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Store prompts as versioned artefacts in version control, reviewed like code, with each version's identifier recorded in llm_call_log (SN-AI-032). A prompt change must go through the same review process as a code change since it is a behaviour change.",
       "spec_refs": [
         "SN-AI-032"
@@ -12363,7 +12365,7 @@
       "track": "backend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Build an evaluation framework requiring a labelled evaluation set and measured baseline for every AI capability before it reaches a customer, with the eval running in CI (SN-AI-033). A capability with no eval must not be deployable.",
       "spec_refs": [
         "SN-AI-033"
@@ -12385,7 +12387,7 @@
       "track": "backend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Ensure every AI capability degrades to the manual path when unavailable, slow or over budget, so the CRM works completely with all AI features disabled (SN-AI-034). Implement an org-level setting to disable AI entirely (SN-AI-045), with the product remaining fully functional when disabled.",
       "spec_refs": [
         "SN-AI-034",
@@ -12525,7 +12527,7 @@
       "track": "frontend",
       "domain": "AI",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Build the org-settings screen exposing the AI on/off toggle (SN-AI-045), per-tenant usage/cost dashboard with pre-cap alerting (SN-AI-044), and the graceful-degradation status indicator when AI is unavailable (SN-AI-034). Build against the AI-07 LlmProvider contract and any generated settings API types only.",
       "spec_refs": [
         "SN-AI-034",
@@ -12771,7 +12773,7 @@
       "track": "backend",
       "domain": "HARDEN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Externalise all user-facing strings from day one (SN-NFR-030). Implement E.164 phone handling with local display formatting, per-member timezones (ties to F04 follow-ups), locale-aware dates in the UI with ISO-8601 in every API response, INR and USD formatting, and ensure the font stack is Devanagari-capable ahead of the planned Hindi/Bahasa/Vietnamese rollout.",
       "spec_refs": [
         "SN-NFR-030"
@@ -12887,7 +12889,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Implement the shared chart/dataviz primitives referenced by every analytics-adjacent domain (bar, line, funnel/drop-off, and simple comparison charts) as a component family alongside the rest of the foundation library, following 07-design-system.md token/theming conventions. Consumers (ANL overview/lead/WhatsApp dashboards, RULE Meta CAPI reporting, SEQ live-edit reporting dashboard, TEAM dashboard, CAMP monitoring/analytics) depend on this rather than hand-rolling charts per domain.",
       "spec_refs": [
         "SN-DS-030"

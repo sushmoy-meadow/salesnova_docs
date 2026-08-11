@@ -8,6 +8,12 @@ This document defines the definitive architectural patterns, conventions, and st
 
 This is a living document. Treat it as the single source of truth for "how we build things."
 
+> **SalesNova takes three documented deviations from this document** — the API response envelope
+> (Section 9), the cross-module Eloquent import in Section 4's worked example, and the refresh-token
+> layer over Sanctum (Section 13). Each is justified and approved in ADR-0057 (`adr/0057-…`). If you are reading
+> this alongside the SalesNova code and they disagree at one of those three points, that record is
+> why; anywhere else, the code is wrong.
+
 ---
 
 ## Table of Contents
@@ -390,6 +396,10 @@ public function index(Request $request): JsonResponse
 ---
 
 ## 4. Service Layer
+
+> **SalesNova deviates here.** The worked example below imports an Eloquent model across domains,
+> which SalesNova forbids and enforces in CI — cross-module access goes through a published domain
+> event or an interface in `app/Contracts/{Domain}/`. See ADR-0057 §2.
 
 Services contain the business logic of the application. There are two types:
 
@@ -981,6 +991,11 @@ trait EnumArray
 
 ## 9. API Response Format
 
+> **SalesNova deviates here.** It ships `{success, data, meta, policy}` and
+> `{success: false, error: {code, message, details, trace_id}}` — including the `success` boolean
+> this section forbids — because the dual policy object and the error-code catalogue are load-bearing
+> for permission and plan gating. See ADR-0057 §1.
+
 All API responses follow a **consistent envelope structure**. Success responses always wrap payload in a `data` key. Errors always use an `error` key. HTTP status codes convey success/failure — no `status: true/false` booleans.
 
 ### Success — Single Resource
@@ -1463,6 +1478,11 @@ class DeliveryLogDTO
 ---
 
 ## 13. Authentication & Authorization
+
+> **SalesNova adds a layer here, and does not replace anything.** A 15-minute access token and a
+> 30-day rotating refresh token with family reuse-detection sit on top of Sanctum's personal access
+> tokens; Sanctum still issues and verifies every credential, and no JWT was introduced. Recorded as
+> a deviation so a reader finding a refresh endpoint can confirm it in one place. See ADR-0057 §3.
 
 ### Authentication: Laravel Sanctum
 
