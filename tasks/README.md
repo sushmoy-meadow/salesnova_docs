@@ -71,6 +71,7 @@ diagrams), not for tracking progress.
 | Command | What it does |
 |---|---|
 | `next` | Lists tasks ready to start now — all `depends_on` satisfied, not blocked. Supports `--track`/`--domain`/`--gate` filters. |
+| `demo [--limit N]` | Demo-gated slices ranked by how far each still is from buildable, then the tasks standing in the way of more than one of them. See §2b. |
 | `show <TASK-ID>` | Full detail: description, spec refs, live dependency status per dep, acceptance criteria. |
 | `status <TASK-ID> <pending\|in_progress\|done\|deferred>` | Sets status; on transition to `done`, prints which tasks just became unblocked. Refuses a `merged` row and names the slice to use instead. |
 | `blocked` | Lists not-yet-ready tasks and exactly what each is waiting on (plus `blocked_reason` if set). Supports the same filters as `next`. |
@@ -79,7 +80,24 @@ diagrams), not for tracking progress.
 | `validate` | Checks for duplicate ids, dangling `depends_on` refs, and dependency cycles. |
 | `help` (or no args, or `--help`/`-h`) | Prints this same reference at the terminal. |
 
-Filters (`--track`, `--domain`, `--gate`) apply to `next` and `blocked` only.
+Filters (`--track`, `--domain`, `--gate`) apply to `next`, `blocked`, `mine`, `claim` and `demo`.
+
+### 0a. `next` and `demo` answer different questions
+
+`next` ranks by fan-out: `unblocks 46 via 8` means 46 live tasks sit downstream, reached through
+8 direct children. Only live work counts — a `done` descendant was never waiting, a `merged` one is
+already counted inside the slice that absorbed it, and a `deferred` one was taken off the critical
+path deliberately. (Until 2026-08-11 all three were counted, which inflated the figure by about a
+third and flattered the tasks deepest in the stack.)
+
+**Fan-out is a good tiebreaker inside a chosen goal and a bad way to choose the goal.** A schema is
+depended on by everything above it, so it always scores high; a vertical slice is a leaf, because
+nothing depends on a demo, so it always scores zero. Ranking by fan-out alone therefore builds the
+stack bottom-up and never produces anything to show — which is exactly what happened here: 73 tasks
+done, 0 of 98 slices demoable.
+
+`demo` inverts it and ranks by distance to buildable, so pick the slice with `demo` and let `next`
+order the work inside it.
 
 ## 1. ID scheme
 

@@ -3667,7 +3667,8 @@
         "onboarding_screen_definition rows are seed data, not hardcoded in application code",
         "Dismissing the activation checklist persists and survives a new session"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-AUTH-004",
@@ -3751,7 +3752,8 @@
         "Onboarding submit response always returns either the next screen or is_complete=true",
         "activation/tasks response matches the documented JSON shape including completed/total counters"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-AUTH-007",
@@ -4501,7 +4503,8 @@
       "acceptance_criteria": [
         "Merge endpoint request schema supports a winner selection per conflicting field"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-LEAD-006",
@@ -5084,7 +5087,8 @@
       "acceptance_criteria": [
         "The reorder endpoints request schema has no field capable of carrying a full ordered array"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-FIELD-003",
@@ -5798,7 +5802,8 @@
       "acceptance_criteria": [
         "Timeline pagination is strictly cursor-based; no offset/page-number parameter exists in the contract"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-TL-004",

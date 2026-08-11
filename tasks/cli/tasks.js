@@ -82,8 +82,21 @@ function childMap(data) {
   return kids;
 }
 
+/**
+ * How many tasks finishing this one would actually release.
+ *
+ * Only live work counts. A `done` descendant was never waiting; a `merged` one
+ * is a tombstone whose content is already counted inside the slice that absorbed
+ * it; a `deferred` one was taken off the critical path on purpose. Counting any
+ * of the three inflated the figure by roughly a third and, worse, flattered the
+ * tasks deepest in the stack — the ones with the most history beneath them.
+ *
+ * The walk still traverses *through* parked and finished tasks, because an edge
+ * that runs through them still reaches live work on the far side.
+ */
 function descendantCount(data) {
   const kids = childMap(data);
+  const map = byId(data);
   const counts = new Map();
   for (const t of data.tasks) {
     const seen = new Set();
@@ -96,9 +109,47 @@ function descendantCount(data) {
         }
       }
     }
-    counts.set(t.id, seen.size);
+    let live = 0;
+    for (const id of seen) {
+      const task = map.get(id);
+      if (task && task.status !== 'done' && !isParked(task)) live++;
+    }
+    counts.set(t.id, live);
   }
   return counts;
+}
+
+/**
+ * Live prerequisites still standing between a task and being buildable.
+ *
+ * The counterpart to descendantCount, and the one that answers "what could we
+ * show somebody". Fan-out ranks a task by what waits on it, so it always favours
+ * schemas and route contracts — everything sits on top of those. A vertical
+ * slice is a leaf: nothing depends on a demo, so fan-out ranks every demo last.
+ * Distance-to-buildable inverts that and asks how much is left underneath.
+ */
+function prerequisiteDepth(data) {
+  const map = byId(data);
+  const depth = new Map();
+  for (const t of data.tasks) {
+    const blocking = new Set();
+    const visited = new Set();
+    const stack = [t.id];
+    while (stack.length) {
+      const current = map.get(stack.pop());
+      for (const depId of current?.depends_on || []) {
+        const dep = map.get(depId);
+        if (!dep || visited.has(depId)) continue;
+        visited.add(depId);
+        // Parked and finished prerequisites are not in the way, but the chain
+        // above them may still hold live work, so keep walking through.
+        if (dep.status !== 'done' && !isParked(dep)) blocking.add(depId);
+        stack.push(depId);
+      }
+    }
+    depth.set(t.id, blocking);
+  }
+  return depth;
 }
 
 function parseArgs(argv) {
@@ -181,6 +232,74 @@ function cmdNext(data, opts) {
     console.log(
       `  ${t.id.padEnd(17)}[${t.track}/${t.gate}/${t.size}]  ${reach.padEnd(20)}  ${t.title}${ownerLabel(t)}`
     );
+  }
+}
+
+/**
+ * What could we put in front of somebody, soonest.
+ *
+ * `next` answers a different question - which task releases the most work - and
+ * because a demo is a leaf in the graph it ranks every demo last. That ordering
+ * builds the stack bottom-up and leaves nothing to show. This ranks the same
+ * graph by how far each demo-gated slice still is from buildable, and then names
+ * the tasks in the way, so the shared ones are visible.
+ */
+function cmdDemo(data, opts) {
+  const map = byId(data);
+  const depth = prerequisiteDepth(data);
+  const limit = opts.limit ? Number(opts.limit) : 10;
+
+  const slices = filterTasks(
+    data.tasks.filter((t) => t.track === 'fullstack' && t.status !== 'done' && !isParked(t)),
+    { ...opts, track: undefined }
+  ).sort(
+    (a, b) =>
+      depth.get(a.id).size - depth.get(b.id).size ||
+      a.gate.localeCompare(b.gate) ||
+      a.id.localeCompare(b.id)
+  );
+
+  if (slices.length === 0) {
+    console.log('No demo-gated slices match those filters.');
+    return;
+  }
+
+  console.log(`${slices.length} slice(s) not yet demoable, nearest first:\n`);
+  const shown = slices.slice(0, limit);
+  for (const t of shown) {
+    const n = depth.get(t.id).size;
+    const away = (n === 0 ? 'buildable now' : `${n} task(s) away`).padStart(15);
+    const title = t.title.replace(/^Slice:\s*/, '');
+    console.log(`  ${away}  [${t.gate}]  ${t.id.padEnd(17)}${title}${ownerLabel(t)}`);
+  }
+  if (slices.length > shown.length) {
+    console.log(`  ... and ${slices.length - shown.length} further out (--limit to see more)`);
+  }
+
+  // A task in the way of several slices at once buys more than its fan-out says.
+  // Tallied over everything within reach rather than over the printed rows, so
+  // --limit changes what is listed above without changing this answer.
+  const NEARBY = 3;
+  const tally = new Map();
+  for (const t of slices.filter((s) => depth.get(s.id).size <= NEARBY)) {
+    for (const blockerId of depth.get(t.id)) {
+      if (!tally.has(blockerId)) tally.set(blockerId, []);
+      tally.get(blockerId).push(t.id);
+    }
+  }
+  const shared = [...tally.entries()]
+    .filter(([, slicesBlocked]) => slicesBlocked.length > 1)
+    .sort((a, b) => b[1].length - a[1].length);
+
+  if (shared.length) {
+    console.log(`\nIn the way of more than one slice within ${NEARBY} tasks of demoable:\n`);
+    for (const [blockerId, slicesBlocked] of shared.slice(0, 10)) {
+      const b = map.get(blockerId);
+      const ready = isReady(b, map) ? 'ready' : b.status;
+      console.log(
+        `  ${blockerId.padEnd(17)}unlocks ${String(slicesBlocked.length).padStart(2)}  [${b.track}/${ready}]  ${b.title}${ownerLabel(b)}`
+      );
+    }
   }
 }
 
@@ -734,6 +853,8 @@ Usage: node docs/tasks/cli/tasks.js <command> [args] [--track T] [--domain D] [-
 
 Commands:
   next                    List tasks ready to start now (all dependencies done, not blocked)
+  demo [--limit N]        Demo-gated slices ranked by how far each is from buildable, plus the
+                          tasks in the way of more than one. Use this to pick what to show.
   show <TASK-ID>          Full detail: description, spec refs, dependency status, acceptance criteria
   status <TASK-ID> <s>    Set status to pending | in_progress | done; reports newly-unblocked tasks
   blocked                 List tasks not yet ready, and exactly what they're waiting on
@@ -752,11 +873,18 @@ Commands:
   release <TASK-ID...>    Drop your claim
   mine                    Everything you have claimed
 
-Filters (next, blocked, mine, claim): --track backend|frontend|design|infra|qa   --domain ARCH
+Filters (next, blocked, mine, claim, demo): --track backend|frontend|design|infra|qa  --domain ARCH
                                       --gate G0   --owner <handle>   --unassigned
 
-next lists most-leverage-first. "unblocks 141 via 1" means 141 tasks downstream reached
-through 1 direct child - one big subtree passing through, not this task's own breadth.
+next lists most-leverage-first. "unblocks 141 via 1" means 141 live tasks downstream
+reached through 1 direct child - one big subtree passing through, not this task's own
+breadth. Done, merged and deferred tasks are not counted: none of them is waiting.
+
+next and demo answer different questions, and the second is usually the one being asked.
+Fan-out ranks a task by what sits on top of it, so schemas and route contracts always win
+and a demo - a leaf nothing depends on - always loses. Ranking by fan-out alone builds the
+stack bottom-up and leaves nothing to show. Pick a slice with demo, then let next order
+the work inside it.
 
 Who you are is resolved in this order, so on your own machine you never type it:
   --to/--as <handle>  >  $SALESNOVA_DEV  >  git config user.name
@@ -790,6 +918,8 @@ function main() {
   switch (cmd) {
     case 'next':
       return cmdNext(data, opts);
+    case 'demo':
+      return cmdDemo(data, opts);
     case 'show':
       return cmdShow(data, positional[0]);
     case 'status':
