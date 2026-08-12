@@ -4449,7 +4449,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Migration + models for saved_filter (org-visible flag, definition jsonb), import_batch/import_batch_row (per-row result, undoable for 7 days per SN-LEAD-071), export_job (filter, row_count, signed URL, 24h expiry, requester - audit-logged per SN-LEAD-072), and membership.preferences.grid_columns jsonb for per-member column persistence (SN-LEAD-013).",
       "spec_refs": [
         "SN-LEAD-011",
@@ -4497,7 +4497,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define the assignment PATCH endpoint (writes LEAD_ASSIGNED, SN-LEAD-030), duplicate-review queue endpoints, and the merge endpoint (field-by-field payload with per-field winner selection) plus its 30-day undo endpoint, per SN-LEAD-050..052.",
       "spec_refs": [
         "SN-LEAD-030..032",
@@ -4596,7 +4596,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Ensure GET /leads/{id} never mutates the record as a side effect (SN-LEAD-023). Implement the explicit POST /api/v1/leads/{id}/interactions call that the client issues after a 2-second dwell to clear new-lead status - this endpoint, not the GET, is what updates last_interaction_at/is_new. Implement time-in-stage computed from custom_field_value_history as a human-readable string, displaying an empty-dash placeholder when no history exists rather than deriving a fabricated value from updated_at (SN-LEAD-024).",
       "spec_refs": [
         "SN-LEAD-021",
@@ -5796,7 +5796,7 @@
       "track": "backend",
       "domain": "TL",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define the cursor-paginated lead-timeline GET (50/page, ordered on occurred_at,id descending, never offset-paginated per SN-TL-020), manual-activity POST (NOTE/CALL/MEETING/MESSAGE) and PATCH/DELETE (MANUAL entries only), pin endpoint, presigned attachment upload, category filters (SN-TL-022), and the org-wide /insights/activity feed endpoint with member/type/date/group filters, permission-scoped via a visibleTo query scope rather than post-filtering (SN-TL-030, SN-TL-031). Publish generated types per SN-ARCH-032 - unblocks frontend.",
       "spec_refs": [
         "SN-TL-010..014",
@@ -11209,7 +11209,7 @@
       "track": "backend",
       "domain": "SET",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Create migrations/models for: membership.preferences (structured/JSONB column) for user-scoped settings (display name style, default share channel, default page CTA, startup screen, default lead sort/view, default content tab, quick_contact_options as an ordered array of {button_type, user_selection}, grid columns, default intro content, default sequence, follow-up defaults); organization.settings (structured/JSONB) for org-scoped settings (duplicate policy + match-key toggles, unmark-contacted triggers, new-lead badge sources, branding fields: logo/favicon/colours/share-domain/from-name/powered-by toggle); a settings_lock table recording which user-scoped keys an owner has locked org-wide; a documented-defaults seed file/table so every preference resolves to a known default, never null. Reuse the existing G0 audit_log table for org-setting change history.",
       "spec_refs": [
         "SN-SET-002",

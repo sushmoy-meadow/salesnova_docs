@@ -323,6 +323,14 @@ silently, and the drift surfaces in production.
 
 CI fails when the committed spec differs from the generated one.
 
+Lead assignment, duplicate review, merge, and merge-undo routes follow this
+same contract-first path; merge winner selections are represented as explicit
+field/lead pairs so custom-field choices remain describable in OpenAPI.
+
+Timeline and activity-feed streams use the same generated contract with opaque
+cursors and stable `(occurred_at, id)` ordering; offset and page-number fields
+are deliberately absent.
+
 ### SN-ARCH-033 — Optimistic updates with per-element rollback
 
 Per [`08-ux-flows.md`](08-ux-flows.md). A failed mutation reverts **that element**, inline, with a
