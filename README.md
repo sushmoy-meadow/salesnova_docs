@@ -162,6 +162,7 @@ it as a gap against this tree instead.
 | [`13-open-decisions.md`](13-open-decisions.md) | **LIVE** — unresolved choices with criteria, owners, deadlines |
 | [`adr/`](adr/README.md) | The decisions already made, with the reasoning that produced them |
 | [`tasks/`](tasks/README.md) | The 526-task delivery DAG and the CLI over it |
+| [`ISSUE_LOG.md`](ISSUE_LOG.md) | **LIVE** — defects and deferred work found while building something else |
 
 The four items on the critical path in [`13-open-decisions.md`](13-open-decisions.md) are:
 **OD-1** the WhatsApp provider path, **OD-2** approval of the visual direction, **OD-3**
