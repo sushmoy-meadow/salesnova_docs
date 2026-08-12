@@ -2855,7 +2855,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-UX-004"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-UX-004",
@@ -4565,7 +4566,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-LEAD-020"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-008",
@@ -4689,7 +4691,8 @@
       "absorbed": [
         "TASK-LEAD-013",
         "TASK-LEAD-021"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-013",
@@ -4729,7 +4732,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-LEAD-022"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-015",
@@ -4758,7 +4762,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-LEAD-023"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-016",
@@ -4784,7 +4789,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-LEAD-024"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-017",
@@ -4806,7 +4812,8 @@
       "acceptance_criteria": [
         "/leads/table is the route a user lands on by default"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-018",
@@ -4968,7 +4975,8 @@
         "A saved view created by one member is not visible to a member outside its scope."
       ],
       "blocked_reason": null,
-      "respec": true
+      "respec": true,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-LEAD-026",
@@ -5098,7 +5106,8 @@
       "acceptance_criteria": [
         "The reorder endpoints request schema has no field capable of carrying a full ordered array"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-FIELD-003",
@@ -5179,7 +5188,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-FIELD-007"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-FIELD-006",
@@ -5909,7 +5919,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-TL-009"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-TL-006",
@@ -5937,7 +5948,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-TL-011"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-TL-007",
@@ -6069,7 +6081,8 @@
         "An event produced by a system action carries the acting user, not the system, where a user initiated it."
       ],
       "blocked_reason": null,
-      "respec": true
+      "respec": true,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-TL-013",
@@ -6179,7 +6192,8 @@
         "All three content types persist through one content base table with type-specific detail rows joined 1:1.",
         "A folder holds at most one level of content per item; labels are many-to-many and independent of folder assignment."
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CONT-002",
@@ -6213,7 +6227,8 @@
         "AC-CONT-020.1",
         "OpenAPI spec generates a typed client with no any fields for any content endpoint."
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CONT-003",
@@ -9865,7 +9880,8 @@
         "Migrations run cleanly up/down on a seeded multi-tenant database",
         "sub_teams and accessible_subteam_ids are scoped per-org and pass the tenant isolation test suite"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-TEAM-002",
@@ -9897,7 +9913,8 @@
         "OpenAPI spec and generated TS client compile with no manual edits",
         "Deactivation request without reassignment target returns 422 (AC-TEAM-004.1)"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-TEAM-003",
@@ -10922,7 +10939,8 @@
         "Migrations pass tenant isolation suite",
         "Dedup index enforces no duplicate notification for same event+recipient within 60s"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-NOTIF-002",
@@ -10946,7 +10964,8 @@
       "acceptance_criteria": [
         "AC-NOTIF-032.1 — attempting to disable payment-failure notifications is rejected with an explanation"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-NOTIF-003",
