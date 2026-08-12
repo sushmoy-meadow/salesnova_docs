@@ -87,12 +87,13 @@
         {
           "id": "R-TASK-ARCH-005.2",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "Accepted during the run — listed so it is not a surprise — - **`routes/api.php:10-15`, `require_once` → `require`.** A real latent bug, not scope creep.",
           "closes_when": [
             "TASK-ARCH-013"
           ],
-          "source": "TASK-ARCH-005-open-points.md"
+          "source": "TASK-ARCH-005-open-points.md",
+          "closed_by": "TASK-ARCH-013"
         }
       ]
     },
@@ -236,7 +237,7 @@
       "track": "fullstack",
       "domain": "ARCH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from ARCH-013 + ARCH-029.\n\n\n\n**TASK-ARCH-013 — Implement /bootstrap payload assembly service**\nImplement the service that assembles the full /bootstrap payload defined in 05-api-design.md section 6, aggregating: user, organization, membership, capabilities, subscription, app_constraints, feature_flags, navigation (server-driven per plan/flag state), warnings (single channel for all banners - expiry, payment failure, WhatsApp health, seat limits), onboarding, activation, counts, and server_time. Cache per ARCH-12 and invalidate via the X-Bootstrap-Stale: true response header on relevant mutations.\n\n**TASK-ARCH-029 — Integrate bootstrap-driven navigation, warnings and counts into the app shell end-to-end**\nWire the real /bootstrap payload assembly service (ARCH-13) into the live app shell (ARCH-21), replacing any placeholder/mock navigation, badge counts or warnings banner. Confirm the single warnings channel renders every producer (expiry, payment failure, WhatsApp health, seat limits) through one shared banner component, and that a plan change or flag rollout reshapes navigation with no frontend release.",
       "spec_refs": [
         "SN-ARCH-088",
@@ -2346,12 +2347,13 @@
         {
           "id": "R-TASK-DESIGN-013.2",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "The badge counts are a prop, and nothing fills it — `AppShell` takes `counts` and both navigations render it.",
           "closes_when": [
             "TASK-ARCH-013"
           ],
-          "source": "TASK-DESIGN-013-open-points.md"
+          "source": "TASK-DESIGN-013-open-points.md",
+          "closed_by": "TASK-ARCH-013"
         },
         {
           "id": "R-TASK-DESIGN-013.3",
@@ -2709,12 +2711,13 @@
         {
           "id": "R-TASK-UX-001.1",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "Tier one has no producer — `tierFor()` returns `toast-undo` and `toast()` exists, but nothing in `src/` calls it — no screen has been built yet that archives a lead or saves a note.",
           "closes_when": [
             "TASK-ARCH-013"
           ],
-          "source": "TASK-UX-001-open-points.md"
+          "source": "TASK-UX-001-open-points.md",
+          "closed_by": "TASK-ARCH-013"
         },
         {
           "id": "R-TASK-UX-001.2",
@@ -3956,7 +3959,7 @@
       "track": "fullstack",
       "domain": "AUTH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from AUTH-012 + AUTH-018.\n\n\n\n**TASK-AUTH-012 — Implement server-driven onboarding sequence engine and industry seeding**\nImplement the onboarding screen sequencer: server decides and returns the next screen (organisation name to industry to team size to lead source to WhatsApp, per SN-AUTH-033), persists answers and progress so the flow is resumable, and treats every screen except organisation name as skippable without blocking product access (SN-AUTH-031). Answering the industry question MUST seed lead stages, custom fields and starter message-template content per the real_estate/insurance/education preset table in SN-AUTH-032.\n\n**TASK-AUTH-018 — Build data-driven onboarding screen renderer**\nBuild a generic /onboarding renderer that has no hardcoded sequence: it renders whatever screen_key/fields/progress the server returns (per the JSON shape in SN-AUTH-030) and posts answers back, supporting skip (except organisation name) and resuming mid-sequence per SN-AUTH-031.",
       "spec_refs": [
         "SN-AUTH-030..033"

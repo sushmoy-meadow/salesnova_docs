@@ -91,3 +91,4 @@ Status · Date · Deciders
 | [0065](0065-the-refresh-chain-remembers-the-organisation-and-a-reuse-ends-the-family.md) | The refresh chain remembers the organisation, and a reuse ends the family | Accepted |
 | [0066](0066-search-results-come-from-the-response-and-nothing-a-browser-holds-is-a-result.md) | Search results come from the response, and nothing a browser holds is a result | Accepted |
 | [0067](0067-a-magic-link-grants-one-action-and-the-action-decides-how-long-it-lives.md) | A magic link grants one action, and the action decides how long it lives | Accepted |
+| [0068](0068-the-web-app-reads-the-contract-at-runtime-and-never-imports-it.md) | The web app reads the contract at runtime, and never imports it | Accepted |
