@@ -86,8 +86,8 @@ Status · Date · Deciders
 | [0060](0060-html-is-cleaned-by-the-column-and-the-policy-is-written-once.md) | HTML is cleaned by the column, and the policy is written once | Accepted |
 | [0061](0061-lead-query-boundaries-and-phone-fallback.md) | Lead queries reject unavailable predicates and use a bounded phone fallback | Accepted |
 | [0062](0062-bulk-records-retain-source-evidence-and-tenant-links.md) | Bulk records retain source evidence and tenant-linked ownership | Accepted |
-| [0063](0063-lead-merge-winners-are-explicit-field-lead-pairs.md) | Lead merge winners are explicit field/lead pairs | Accepted |
-| [0064](0064-timeline-and-activity-streams-use-one-cursor-contract.md) | Timeline and activity streams use one cursor contract | Accepted |
+| [0063](0063-lead-merge-winners-are-explicit-field-lead-pairs.md) | Lead merge winners are explicit field/lead pairs | Superseded in part by 0072 |
+| [0064](0064-timeline-and-activity-streams-use-one-cursor-contract.md) | Timeline and activity streams use one cursor contract | Superseded in part by 0072 |
 | [0062](0062-a-verified-identifier-is-an-account-and-the-two-otp-ceilings-both-hold.md) | A verified identifier is an account, and both OTP ceilings hold | Accepted |
 | [0063](0063-the-onboarding-sequence-is-rows-so-its-keys-cannot-be-enums.md) | The onboarding sequence is rows, so its keys cannot be enums | Accepted |
 | [0064](0064-the-code-step-is-a-route-and-the-session-is-a-cookie-the-page-cannot-read.md) | The code step is a route, and the session is a cookie the page cannot read | Accepted |
@@ -98,3 +98,4 @@ Status · Date · Deciders
 | [0069](0069-subteam-scope-keeps-uuid-jsonb-storage.md) | Sub-team scope keeps UUIDs in JSONB | Accepted |
 | [0070](0070-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md) | Google arrives by redirect, and the browser never holds the credential | Accepted |
 | [0071](0071-the-refresh-cookie-is-set-on-our-own-origin-so-the-auth-routes-are-proxied.md) | The refresh cookie is set on our own origin, so the auth routes are proxied | Accepted |
+| [0072](0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md) | The built endpoint decides its contract where it differs from the stub | Accepted |

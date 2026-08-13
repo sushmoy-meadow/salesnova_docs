@@ -1,6 +1,12 @@
 # ADR-0063 — Lead merge winners are explicit field/lead pairs
 
-Accepted · 2026-08-11 · @sakib
+Superseded in part · 2026-08-11 · @sakib
+
+> **Superseded 2026-08-13 by
+> [0072](0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md)** in the
+> request shape below. The shipped endpoint takes `duplicate_lead_id` and a `field_winners` map, and
+> takes the survivor from the route. The undo route and its thirty-day window still stand. The body
+> of this record is left as written.
 
 ## Context
 

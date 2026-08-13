@@ -495,37 +495,6 @@ third instance, not a fix — a number nobody allocates is the defect.
 
 ---
 
-### ISS-025 · ADR-0063 specifies a merge request shape that the shipped endpoint does not accept
-
-`salesnova_docs/adr/0063-lead-merge-winners-are-explicit-field-lead-pairs.md:14` ·
-`salesnova_backend/app/Http/Requests/Client/Leads/LeadMergeRequest.php`
-
-The ADR is Accepted and says `POST /leads/{lead}/merge` takes `survivor_lead_id` and a
-`winner_selections` array of `{field, lead_id}` pairs. What shipped takes `duplicate_lead_id` and
-`field_winners`, a map from field name to `'survivor'|'duplicate'` — which is the shape the ADR's
-Alternatives section explicitly rejected.
-
-The reason it gave for rejecting it no longer holds: "the project's request contract generator
-exposes wildcard Laravel arrays as list schemas, making the map shape either inaccurate or
-undocumented". A `#[BodyParameter]` attribute on the request states the map type directly, and the
-generated spec now carries `additionalProperties` with the two-value enum, so the map is documented
-exactly. The implementation also removed the ADR's stated follow-up burden — the survivor is the
-route's own lead, so it cannot disagree with the URL, and the duplicate is verified as flagged
-against it.
-
-So the code looks right and the decision record looks wrong, which is the dangerous way round: the
-next person to read 0063 will implement against a contract no endpoint serves. Found only because
-sakib's contract test asserted the ADR's shape and failed on merge; that test now asserts what ships.
-
-**What closes it:** an ADR superseding 0063 that records the map shape, the attribute that makes it
-expressible, and the survivor-from-the-route decision. 0063 marked Superseded rather than edited.
-Note ISS-024 — 0063 is one of the three doubled numbers, so this needs the renumbering settled first
-or the supersession will name an ambiguous target.
-
-**Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
-
----
-
 ### ISS-026 · Two parallel timeline stacks are both wired in, and a route reaches across them
 
 `salesnova_backend/app/Providers/AppServiceProvider.php` — `EventWriter` and `TimelineEventWriter`
@@ -580,11 +549,55 @@ filtering. The naming is a smaller call and belongs to the two developers, not t
 `occurred_after`/`occurred_before` win, they are a rename of a shipped query parameter and need the
 frontend's feed call moved with them.
 
+> **Still open after
+> [ADR-0072](adr/0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md),
+> 2026-08-13.** That decision settles which side's *shape* is the contract and explicitly declines
+> to settle either half of this: the missing filter is a capability nothing delivers, and the naming
+> is the two developers' call. Recorded so the supersession is not mistaken for blessing the gap.
+
 **Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
 
 ---
 
 ## Closed
+
+### ISS-025 · ADR-0063 specifies a merge request shape that the shipped endpoint does not accept
+
+`salesnova_docs/adr/0063-lead-merge-winners-are-explicit-field-lead-pairs.md:14` ·
+`salesnova_backend/app/Http/Requests/Client/Leads/LeadMergeRequest.php`
+
+The ADR is Accepted and says `POST /leads/{lead}/merge` takes `survivor_lead_id` and a
+`winner_selections` array of `{field, lead_id}` pairs. What shipped takes `duplicate_lead_id` and
+`field_winners`, a map from field name to `'survivor'|'duplicate'` — which is the shape the ADR's
+Alternatives section explicitly rejected.
+
+The reason it gave for rejecting it no longer holds: "the project's request contract generator
+exposes wildcard Laravel arrays as list schemas, making the map shape either inaccurate or
+undocumented". A `#[BodyParameter]` attribute on the request states the map type directly, and the
+generated spec now carries `additionalProperties` with the two-value enum, so the map is documented
+exactly. The implementation also removed the ADR's stated follow-up burden — the survivor is the
+route's own lead, so it cannot disagree with the URL, and the duplicate is verified as flagged
+against it.
+
+So the code looks right and the decision record looks wrong, which is the dangerous way round: the
+next person to read 0063 will implement against a contract no endpoint serves. Found only because
+sakib's contract test asserted the ADR's shape and failed on merge; that test now asserts what ships.
+
+**What closes it:** an ADR superseding 0063 that records the map shape, the attribute that makes it
+expressible, and the survivor-from-the-route decision. 0063 marked Superseded rather than edited.
+Note ISS-024 — 0063 is one of the three doubled numbers, so this needs the renumbering settled first
+or the supersession will name an ambiguous target.
+
+**Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
+
+> **Closed 2026-08-13 by
+> [ADR-0072](adr/0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md).**
+> The shipped shape is now the recorded one, and 0063 is marked superseded in that part rather than
+> edited. The ambiguity this entry warned about — 0063 being one of ISS-024's doubled numbers — was
+> sidestepped rather than solved: the supersession links the file, not the bare number, so it names
+> one document. ISS-024 stays open.
+
+---
 
 ### ISS-003 · The shell's redirect into onboarding has never run in a browser
 

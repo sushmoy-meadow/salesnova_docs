@@ -1,6 +1,13 @@
 # ADR-0064 — Timeline and activity streams use one cursor contract
 
-Accepted · 2026-08-11 · @sakib
+Superseded in part · 2026-08-11 · @sakib
+
+> **Superseded 2026-08-13 by
+> [0072](0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md)** in the
+> filter names only: the streams ship `categories[]`, `from` and `to`. The cursor contract this
+> record exists for — `cursor` and `limit`, never `page`, `per_page` or `offset`, ordered by
+> `occurred_at, id` descending — is untouched and still binding. The lead-group filter named below
+> was never built; that is ISS-027, not a supersession.
 
 ## Context
 
