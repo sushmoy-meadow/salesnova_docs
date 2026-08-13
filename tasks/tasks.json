@@ -3990,7 +3990,7 @@
       "track": "fullstack",
       "domain": "AUTH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from AUTH-013 + AUTH-019.\n\n\n\n**TASK-AUTH-013 — Implement activation checklist derivation logic**\nImplement the 7 activation task completion checks as live state queries, never a stored done flag: WhatsApp connected, first lead added, first message/logged contact, lead source connected, content created, content shared, team member invited - exact conditions per the table in SN-AUTH-041. Implement permanent dismissal persistence (SN-AUTH-042).\n\n**TASK-AUTH-019 — Build activation checklist widget**\nBuild the activation checklist UI consuming GET /api/v1/activation/tasks: progress indicator (completed/total), per-task CTA with deep link and estimated time, and a persistent dismiss action per SN-AUTH-040..042.",
       "spec_refs": [
         "SN-AUTH-040..042"
@@ -4019,7 +4019,7 @@
       "track": "fullstack",
       "domain": "AUTH",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from AUTH-014 + AUTH-020.\n\n\n\n**TASK-AUTH-014 — Implement bootstrap.warnings banner producer framework**\nImplement a single shared mechanism through which any producer (subscription expiry, payment failure, WhatsApp health, seat limits, deprecations) contributes an entry to bootstrap.warnings, with the documented shape code/severity/message/action/dismissible/expires_at. Non-dismissible MUST be reserved for states with data-loss or service-loss consequences (SN-AUTH-050).\n\n**TASK-AUTH-020 — Build global banner component**\nBuild the single rendering component for bootstrap.warnings entries with severity-based styling (warning/error/info), optional action button/route, and dismissibility governed strictly by the dismissible flag from the server per SN-AUTH-050.",
       "spec_refs": [
         "SN-AUTH-050"
@@ -4090,14 +4090,15 @@
         {
           "id": "R-TASK-AUTH-016.1",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "Every signup endpoint answers 501 — `POST /signup/identifier`, `/signup/profile`, `/signup/verify` and `/signup/resend` are published and typed, and every one of them returns `NOT_IMPLEMENTED` until `TASK-AUTH-010` lands.",
           "closes_when": [
             "TASK-AUTH-010",
             "TASK-AUTH-021",
             "TASK-ARCH-021"
           ],
-          "source": "TASK-AUTH-016-open-points.md"
+          "source": "TASK-AUTH-016-open-points.md",
+          "closed_by": "TASK-AUTH-021"
         },
         {
           "id": "R-TASK-AUTH-016.2",
@@ -4118,12 +4119,13 @@
         {
           "id": "R-TASK-AUTH-016.4",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "Only one failure renders per round trip — A page with no JavaScript carries its last failure in the query string, so one error code and one field name survive a redirect.",
           "closes_when": [
             "TASK-AUTH-021"
           ],
-          "source": "TASK-AUTH-016-open-points.md"
+          "source": "TASK-AUTH-016-open-points.md",
+          "closed_by": "TASK-AUTH-021"
         },
         {
           "id": "R-TASK-AUTH-016.5",
@@ -4264,7 +4266,7 @@
       "track": "qa",
       "domain": "AUTH",
       "gate": "G0",
-      "status": "pending",
+      "status": "done",
       "description": "Prove the three auth slices compose into one working identity system. Each slice (sign-in screens, signup, invite acceptance) is demoable alone; this task proves a single person can move between them without falling into a gap. Cover: OTP request/verify/resend including the resend cooldown and the expired-code path; session issuance, silent refresh and refresh-token reuse detection; multi-org switching from the org picker; the signup stage machine including a resumed signup after a browser restart; invite acceptance by both a brand-new user and an existing user who already belongs to another org. Google sign-in and Turnstile are recorded as open decisions on TASK-AUTH-016 and are in scope here only if those decisions have landed - if they have not, this task records them as still open rather than silently passing.",
       "spec_refs": [
         "SN-AUTH-001..007",
@@ -4668,7 +4670,7 @@
       "track": "fullstack",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from LEAD-012 + LEAD-013 + LEAD-021.\n\n\n\n**TASK-LEAD-012 — Implement duplicate-detection engine**\nRun duplicate detection at lead creation time - manual, import, or integration - matching against email, phone_e164 and whatsapp_e164, before assignment runs (SN-LEAD-050). Implement the three org-level policies: CREATE_NEW (create anyway, link as related), MERGE_EXISTING (auto-merge, append to timeline), FLAG_FOR_REVIEW (create, mark both, queue for review - the default per SN-LEAD-051). This sits in the inbound-lead hot path; target p95 under 100ms per F02 section 10.\n\n**TASK-LEAD-013 — Implement merge engine with 30-day undo**\nImplement lead merge: combine timelines chronologically; union groups, custom-field values (survivor wins conflicts unless explicitly overridden), content shares, follow-ups (keep the earliest pending); union WhatsApp conversations; write a LEAD_MERGED event carrying the full pre-merge state of both records; soft-delete the merged-away record for 30 days with a working undo path that restores both records with their original timelines (SN-LEAD-052).\n\n**TASK-LEAD-021 — Build duplicate review and merge UI**\nBuild the flagged-duplicate review queue and the merge screen: field-by-field comparison with per-field winner selection, and a visible undo affordance for merges within the 30-day window (SN-LEAD-050..052).",
       "spec_refs": [
         "SN-LEAD-050",
@@ -5897,7 +5899,7 @@
       "track": "fullstack",
       "domain": "TL",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from TL-005 + TL-009.\n\n\n\n**TASK-TL-005 — Implement manual activity logging logic**\nImplement create/edit/delete for the four manual activity types (NOTE/CALL/MEETING/MESSAGE) with only type and occurred_at required (defaulting to now), optional extras per type per SN-TL-010; allow backdating occurred_at into the past while displaying logged-on plus created_at alongside the event time (SN-TL-011); permit edit/delete only by the author or a member with leads.edit_others, showing edited with a timestamp on edits, while system/WhatsApp/integration events remain permanently non-editable at every permission level (SN-TL-013); enforce the pin cap of 3 (SN-TL-014); ensure WHATSAPP_FAILED and similar failure events render with a human-readable reason (SN-TL-004).\n\n**TASK-TL-009 — Build lead timeline UI**\nBuild the lead-detail timeline component: unified reverse-chronological stream with sticky day headers and relative labels (SN-TL-021), category filter chips with System off by default (SN-TL-022), the six UI states from SN-TL-025, the manual-activity composer for NOTE/CALL/MEETING/MESSAGE with attachment upload (SN-TL-010..012), edit/delete affordances limited to MANUAL entries per author/leads.edit_others (SN-TL-013), pinning UI capped at 3 (SN-TL-014), and a visually prominent human-readable failure reason on WHATSAPP_FAILED/CAMPAIGN_FAILED/SEQUENCE_BROKEN events (SN-TL-004).",
       "spec_refs": [
         "SN-TL-010..014",
@@ -5928,7 +5930,7 @@
       "track": "fullstack",
       "domain": "TL",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from TL-006 + TL-011.\n\n\n\n**TASK-TL-006 — Implement timeline read/query and permission-scoped org feed logic**\nImplement cursor pagination on occurred_at,id descending for the lead timeline (SN-TL-020), day-grouping with relative labels (Today/Yesterday/Last Tuesday, SN-TL-021), category filters with the System filter off by default (SN-TL-022), and the org-wide activity feed at /insights/activity scoped by the visibleTo query scope so a member without leads.view_others only ever sees events on leads they can see - enforced in the query itself, never by post-filtering a fetched result set (SN-TL-030, SN-TL-031).\n\n**TASK-TL-011 — Build org-wide activity feed UI**\nBuild /insights/activity showing the same events unfiltered by lead, permission-scoped, with member/event-type/date-range/lead-group filters (SN-TL-030, SN-TL-031).",
       "spec_refs": [
         "SN-TL-020..022",

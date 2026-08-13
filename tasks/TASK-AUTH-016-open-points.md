@@ -19,6 +19,12 @@ returned `AccountSession` is validated and then dropped. Nothing here establishe
 
 ## Google signup is an entry point without a handshake
 
+> **Decided 2026-08-13 —
+> [ADR-0069](../adr/0069-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
+> A server-side authorization-code redirect, run by the web app: no Google SDK anywhere, no
+> credential in the browser, and both entry points stay plain links. Not built yet, so the rest of
+> this section is still an accurate description of the code.
+
 **Task description:** *Google signup skipping stage 3.*
 
 The stage logic is built and tested: `screensFor("google")` omits `VERIFICATION`, and the page
@@ -43,6 +49,13 @@ guarded.
 
 ## The captcha renders its failure but is not mounted
 
+> **Decided 2026-08-13 —
+> [ADR-0069](../adr/0069-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
+> Turnstile is mounted as a plain script tag, not a React island: `SN-AUTH-010` forbids requiring
+> the application bundle, which a third-party script does not. The cost it accepts is that a
+> visitor with JavaScript off can no longer request a code, which is `SN-AUTH-004`'s own trade.
+> Not built yet.
+
 `SN-AUTH-004` requires Cloudflare Turnstile on signup initiation. This screen routes a captcha
 rejection to its own notice rather than to the identifier field — that is the part `SN-AUTH-013`
 demanded and it is tested — but no widget is rendered, so no such rejection can be produced in
@@ -65,10 +78,14 @@ first is rendered. Reasoned in
 With four short inputs across three stages this has not yet cost anything, but it is a genuine
 narrowing of `422` handling and `TASK-AUTH-021` is the place it would first show up.
 
-## Types are a stand-in, not generated
+## Types are hand-written
 
-Unchanged from `TASK-AUTH-017`, and now larger. `SN-ARCH-032` forbids hand-written API types, and
-the generated client lives in `salesnova_backend/contracts/` with no publishing route into this
-repo. `src/lib/auth/signup-request.ts` mirrors `SignupState`, `SignupStage` and `AccountSession` as
-Zod schemas read off that contract by hand. They validate at the boundary as `docs/tasks/RULES.md`
-requires, but they are not generated and will drift.
+> **Settled 2026-08-13.** This was written as an open violation of `SN-ARCH-032`. It is not one:
+> [ADR-0068](../adr/0068-the-web-app-reads-the-contract-at-runtime-and-never-imports-it.md) decided
+> that the web app validates every response with its own Zod schema and imports nothing from the
+> API's checkout. Hand-written schemas are the decision, not the debt.
+
+`src/lib/auth/signup-request.ts` mirrors `SignupState` and `SignupStage` as Zod schemas read off the
+published contract by hand; `AccountSession` moved to `src/lib/auth/account-session.ts` in
+`TASK-AUTH-021`, where both endpoints that mint one share it. They validate at the boundary as
+`docs/tasks/RULES.md` requires.

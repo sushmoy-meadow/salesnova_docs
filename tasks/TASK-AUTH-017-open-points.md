@@ -29,14 +29,18 @@ success path beyond the client boundary: nothing in this repo yet consumes the r
 `AccountSession` or navigates anywhere after acceptance, because there is no authenticated shell to
 navigate into (`TASK-ARCH-021`).
 
-## Types are a stand-in, not generated
+## Types are hand-written
 
-`SN-ARCH-032` forbids hand-written API types, and the generated client lives in
-`salesnova_backend/contracts/` with no publishing route into this repo. The Zod schemas here — the
-shared envelope in `src/lib/auth/api-envelope.ts` and the invitation shape in
-`src/lib/auth/invite-preview.ts` — validate at the boundary as `docs/tasks/RULES.md` requires, but
-they are not generated and will drift. Wiring the generated client into this repo is its own task
-and was not in scope.
+> **Settled 2026-08-13.** This was written as an open violation of `SN-ARCH-032`. It is not one:
+> [ADR-0068](../adr/0068-the-web-app-reads-the-contract-at-runtime-and-never-imports-it.md) decided
+> that the web app validates every response with its own Zod schema and imports nothing from the
+> API's checkout — the two are independent clones, and a TypeScript type disappears at build and so
+> checks nothing at the seam where it matters. Hand-written schemas are the decision. The paragraph
+> below is kept for what it says about tolerance, which still holds.
+
+The Zod schemas here — the shared envelope in `src/lib/auth/api-envelope.ts` and the invitation
+shape in `src/lib/auth/invite-preview.ts` — validate at the boundary as `docs/tasks/RULES.md`
+requires.
 
 The schemas are deliberately **more tolerant than the published contract** in one place:
 `role_preset` and `expires_at` are required in `InvitationPreview` but optional here, because this
