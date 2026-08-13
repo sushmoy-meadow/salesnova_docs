@@ -495,6 +495,95 @@ third instance, not a fix — a number nobody allocates is the defect.
 
 ---
 
+### ISS-025 · ADR-0063 specifies a merge request shape that the shipped endpoint does not accept
+
+`salesnova_docs/adr/0063-lead-merge-winners-are-explicit-field-lead-pairs.md:14` ·
+`salesnova_backend/app/Http/Requests/Client/Leads/LeadMergeRequest.php`
+
+The ADR is Accepted and says `POST /leads/{lead}/merge` takes `survivor_lead_id` and a
+`winner_selections` array of `{field, lead_id}` pairs. What shipped takes `duplicate_lead_id` and
+`field_winners`, a map from field name to `'survivor'|'duplicate'` — which is the shape the ADR's
+Alternatives section explicitly rejected.
+
+The reason it gave for rejecting it no longer holds: "the project's request contract generator
+exposes wildcard Laravel arrays as list schemas, making the map shape either inaccurate or
+undocumented". A `#[BodyParameter]` attribute on the request states the map type directly, and the
+generated spec now carries `additionalProperties` with the two-value enum, so the map is documented
+exactly. The implementation also removed the ADR's stated follow-up burden — the survivor is the
+route's own lead, so it cannot disagree with the URL, and the duplicate is verified as flagged
+against it.
+
+So the code looks right and the decision record looks wrong, which is the dangerous way round: the
+next person to read 0063 will implement against a contract no endpoint serves. Found only because
+sakib's contract test asserted the ADR's shape and failed on merge; that test now asserts what ships.
+
+**What closes it:** an ADR superseding 0063 that records the map shape, the attribute that makes it
+expressible, and the survivor-from-the-route decision. 0063 marked Superseded rather than edited.
+Note ISS-024 — 0063 is one of the three doubled numbers, so this needs the renumbering settled first
+or the supersession will name an ambiguous target.
+
+**Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
+
+---
+
+### ISS-026 · Two parallel timeline stacks are both wired in, and a route reaches across them
+
+`salesnova_backend/app/Providers/AppServiceProvider.php` — `EventWriter` and `TimelineEventWriter`
+bound side by side · `app/Models/Timeline/Event.php` · `app/Models/Timeline/TimelineEvent.php`
+
+The merge brought together two independent answers to the same problem. Sakib's contract work built
+`TimelineEvent` + `TimelineEventWriter` + `TimelineEventWriterService` with an `EventName` taxonomy
+enforced by a database trigger; sushmoy's slice built `Event` + `EventWriter` + `EventReaderService`
++ `LeadTimelineReader` + `TimelineEntryPresenter`. Both are in the tree, both are bound in the
+container, and both have passing tests. `LeadAssignmentService` writes through the first;
+everything the lead timeline screen reads comes from the second.
+
+The seam is visible in one place already. `POST /leads/{lead}/timeline/{event}/attachments/sign`
+resolves `{event}` to a `TimelineEvent` model by implicit binding, while its four sibling routes on
+the same path resolve the same segment as a plain id looked up through the entry reader. Sibling
+routes on one resource addressing two different entities is a contract that cannot be explained to
+a client.
+
+Costs nothing while the sign endpoint is a 501 stub. It becomes a correctness problem the moment
+that endpoint is built, because an id valid for one stack is not necessarily valid for the other.
+
+**What closes it:** pick one. The read path, the presenter and the frontend are all on `Event`, so
+that is the likely survivor; what `TimelineEvent` carries and `Event` does not — the trigger-enforced
+taxonomy, the partition runway, the attachment columns — has to move across rather than be dropped.
+That is a task, not a tidy-up, and it should land before anything else is built on either.
+
+**Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
+
+---
+
+### ISS-027 · The activity feed publishes no group filter, and two date filters were renamed under it
+
+`salesnova_backend/app/Http/Requests/Client/Timeline/ActivityFeedIndexRequest.php:20` ·
+`salesnova_backend/app/Services/Timeline/ActivityFeedReader.php`
+
+TASK-TL-003 published `GET /insights/activity` with `member_id`, `event_type`, `occurred_after`,
+`occurred_before` and `group_id`. The implementation ships `member_id`, `categories[]`, `from` and
+`to`. Three of those are renames of the same capability; `group_id` is not — there is no group
+filtering anywhere in the reader, and no other parameter reaches it.
+
+Two separate costs. The missing filter is a capability the contract promised and nothing delivers,
+so a client written against the published spec would send `group_id` and silently get an unfiltered
+feed. The renames are cheaper but not free: `from`/`to` on a feed do not say what they bound, where
+`occurred_after`/`occurred_before` do, and the published names are now the vaguer pair.
+
+Both were found by sakib's contract test failing on merge. It has been amended to assert what ships,
+which is what let the merge close — that amendment is the reason this entry exists rather than a red
+test carrying the information.
+
+**What closes it:** the group filter implemented and tested, on whichever task owns the feed's
+filtering. The naming is a smaller call and belongs to the two developers, not to a merge — if
+`occurred_after`/`occurred_before` win, they are a rename of a shipped query parameter and need the
+frontend's feed call moved with them.
+
+**Found:** 2026-08-13, merging `feature/sakib` into `feature/pre-develop`.
+
+---
+
 ## Closed
 
 ### ISS-003 · The shell's redirect into onboarding has never run in a browser
