@@ -961,7 +961,7 @@ apart, which is why the demo is the gate.
 
 ---
 
-### ISS-035 · The lead grid renders no rows in a browser — its list fetch is unauthenticated and off-contract
+### ISS-035 · The lead grid renders no rows in a browser — its list fetch is unauthenticated and off-contract — closed 2026-08-14
 
 `salesnova_frontend/src/components/leads/lead-grid-screen.tsx:147` ·
 `salesnova_frontend/src/lib/leads/lead-query.ts`
@@ -987,6 +987,40 @@ the bulk preview/execute running for real against the backend.
 
 **Found:** 2026-08-14, building TASK-LEAD-014, trying to reach the grid for the bulk demo.
 
+**Update — 2026-08-14, TASK-LEAD-025 §6.** Still open, and it is the blocker for TASK-LEAD-025's
+demo (grid inline edit → table + detail). Confirmed in a browser against both live servers: signed in
+with a seeded org, `/leads/grid` sent **no** `/api/v1/leads/query` request at all — `postEnvelope`
+throws in client code because the base URL/token are server-only, so `useQuery` renders the error
+surface with nothing on the wire. The fault is **not grid-only**: `lead-table-screen.tsx`
+(TASK-LEAD-017) uses the same client `fetchLeadQuery`, so neither lead projection loads in a real
+browser. This one seam gates the whole lead-viewing composition; it wants fixing as its own change to
+the LEAD-007/008 seam (server-action read + a valid empty-filter request body) before LEAD-025 can
+close.
+
+**Resolved — 2026-08-14, TASK-LEAD-025 §6.** Fixed as part of closing the slice. Fixing the auth
+surfaced two more faults on the same seam; all three are closed and re-verified in a browser (grid
+inline edit → detail for notes, → table for stage, both without a reload):
+
+1. **Read and write now run server-side.** New `"use server"` actions in
+   `salesnova_frontend/src/app/(app)/leads/lead-actions.ts` — `leadQueryAction` and
+   `updateLeadCellAction` — resolve the session with `requireOrganizationSession()` and inject the
+   bearer token. Both grid and table screens read through `leadQueryAction`; the grid's inline edit
+   writes through `updateLeadCellAction` (passed as `onCellUpdate`).
+2. **Doubled `/v1`.** `QUERY_PATH` (`lead-query.ts`) and `leadCellPath` (`lead-cell-update.ts`) both
+   prefixed `/v1`, so once the request left the browser it 404'd on `/api/v1/v1/leads/…` — the same
+   fault as ISS-034. Both now start at `/leads/…`; their unit tests, which asserted the doubled path
+   under a version-less `baseUrl`, were corrected.
+3. **Bearer token clobbered on writes.** `updateLeadCell` spread the caller's options then replaced
+   `headers` wholesale with an `If-Match`-only object, dropping `authorization` (401). Now merged.
+4. **Off-contract empty filter.** `ComplexQueryRequest.filters` is now `sometimes` (with
+   `operator`/`conditions` `required_with`), so the default view-only list is a valid `200` instead
+   of a `422`. New case in `LeadQueryEngineTest`; contract regenerated.
+
+**Latent sibling — not fixed.** `salesnova_frontend/src/lib/leads/saved-views.ts:14` still carries
+`SAVED_VIEWS_PATH = "/v1/saved-views"`, the identical doubled-prefix bug. It is masked because the
+saved-view endpoints all `501` (ISS-041); it will 404 the same way the moment that backend lands and
+the path should be dropped to `/saved-views` then.
+
 ---
 
 ### ISS-036 · The import upload/commit steps validate the file and batch-id in the controller, not the FormRequest
@@ -1004,3 +1038,129 @@ step, and the two checks respond through the same `ApiResponse` trait. Noted so 
 controller can lift them if the wizard grows more per-step rules.
 
 **Found:** 2026-08-14, TASK-LEAD-015 simplify pass (altitude lens).
+
+### ISS-037 · Lead-export CSV assembles into a bounded in-memory string, and duplicates the import CSV idiom
+
+`salesnova_backend/app/Services/Leads/Export/LeadExportCsvService.php:26` ·
+`salesnova_backend/app/Services/Leads/Import/FailedRowsCsvService.php:18`
+
+Two threads noted in the LEAD-016 simplify pass, both left as-is:
+
+- **Bounded buffer, not a stream.** `LeadExportCsvService::build()` streams rows out of the DB with
+  `lazyById`, but writes them into a `php://temp` handle and returns the whole CSV as one string,
+  which `ExportRequestService` then hands to `Storage::put`. So the produced file is held in memory
+  once (and briefly twice) rather than written straight to the disk stream. It is bounded by the
+  `leads.exports.max_rows` cap (50k → a few MB), so acceptable for the inline export sizes; the fix
+  when a much larger cap is wanted is `Storage::writeStream` with `fputcsv` writing directly into it.
+
+- **Duplicated CSV idiom.** The `fopen('php://temp')` → `fputcsv(..., ',', '"', '\')` →
+  `stream_get_contents` sequence is byte-for-byte the same as the import's `FailedRowsCsvService`.
+  A shared `CsvWriter` would centralise the control-char args so the two cannot drift, but extracting
+  it means editing the already-shipped import service; deferred to avoid churning another task's code
+  for a five-line idiom. Do it if a third CSV writer appears.
+
+**Found:** 2026-08-14, TASK-LEAD-016 simplify pass (efficiency + reuse lenses).
+
+### ISS-038 · `APP_URL` without a port breaks signed download links under local `artisan serve`
+
+`salesnova_backend/.env.example:5`
+
+The lead export produces its download link with `URL::temporarySignedRoute`, which builds an
+absolute URL from `APP_URL`. `.env.example` ships `APP_URL=http://localhost` (no port), so under a
+local `php artisan serve` on :8000 the link points at `http://localhost/…` (port 80) and does not
+resolve — the browser cannot fetch the produced file. Set locally to `http://localhost:8000` for the
+LEAD-016 demo.
+
+Production is unaffected: there `APP_URL` is the real domain and signed URLs resolve. This is a
+local-dev caveat only, and it bites any feature that mints absolute URLs (signed downloads, mailed
+links). Left as-is rather than changing `.env.example`, because the right local value depends on how
+each developer runs the API (`artisan serve` :8000, `composer dev`, a proxy). The durable fix is a
+one-line note in the backend README's setup section that local `APP_URL` must include the serve port
+for signed links to work.
+
+**Found:** 2026-08-14, TASK-LEAD-016 browser demo.
+
+### ISS-039 · The contact-action link list is duplicated between the detail bar and the table row
+
+`salesnova_frontend/src/components/contact/contact-action-bar.tsx:41` ·
+`salesnova_frontend/src/components/leads/lead-table.tsx:52`
+
+Both consumers of `actionableChannels` render the same inner body — the empty-state `<p role="status">`
+or the `actions.map` of `<a className={buttonClassName({variant: isDefault ? primary : secondary, size})}>`
+links. Only the wrapper legitimately differs: the detail bar is sticky, above-the-fold chrome
+(`sticky top-0 z-30 … sm:static`, size `lg`); the table renders it per row in a plain
+`<div role="group">` at size `sm`.
+
+Left as-is in the LEAD-017 simplify pass: a shared `ContactActionLinks({ actions, size })` presentational
+piece would centralise the link list while each caller keeps its own wrapper, but extracting it means
+editing the already-shipped `ContactActionBar` (TASK-DESIGN-007) for a two-caller, ~12-line idiom.
+Extract it when a third consumer of `actionableChannels` appears.
+
+**Found:** 2026-08-14, TASK-LEAD-017 simplify pass (reuse lens).
+
+### ISS-040 · TASK-AUTH-022's demo needs the fields settings surface, which its dependency graph did not require
+
+`salesnova_backend/app/Http/Controllers/Client/Leads/CustomFieldContractController.php:33` ·
+`salesnova_frontend/src/app/settings/custom-fields/` (only `stages/` exists)
+
+TASK-AUTH-022's first acceptance criterion — the slice's demo — is *"Completing onboarding with a
+real_estate industry answer seeds exactly the 5 stages and 3 custom fields specified, verified in the
+database and visible in settings."* The seeding is built and tested (`IndustryPresetSeedingTest`), and
+the 5 stages are visible at `/settings/custom-fields/stages`. The **3 custom fields are not visible in
+any settings surface**: `GET /custom-fields` (index) returns `501 NOT_IMPLEMENTED`, and no
+`/settings/custom-fields` listing page exists. Both are the deliverable of **TASK-FIELD-003** (Slice:
+custom field CRUD + fields settings UI; FIELD-006 merged into it) — `pending`, unbuilt, and *not* a
+declared dependency of AUTH-022 (its deps were AUTH-012/013/014/018/019/020).
+
+The demo cannot be exercised end to end until FIELD-003 lands, and building the listing endpoint + the
+settings page inside AUTH-022 would steal FIELD-003's scope and collide with its own demo (*"An admin
+creates a typed custom field in settings…"*). Per `/build-slice §6` the slice is therefore not closed.
+
+**What closes it:** TASK-FIELD-003. The missing edge `AUTH-022 → FIELD-003` has been added
+(`tasks.js depends`, G1 reference row updated), so AUTH-022 leaves the ready set until FIELD-003 is
+`done`. AUTH-022 was left `pending` (unclaimed, nothing built) rather than `in_progress`, because the
+blocker is an external unbuilt dependency discovered at planning, not half-built work.
+
+**Found:** 2026-08-14, TASK-AUTH-022 `/build-slice` planning (§2–3).
+
+### ISS-041 · Saved-view CRUD is stubbed `501` across every verb, but the frontend calls it live
+
+`salesnova_backend/app/Http/Controllers/Client/Leads/SavedView{Index,Show,Store,Update,Destroy}Controller.php`
+· `salesnova_frontend/src/lib/leads/saved-views.ts`
+
+Every saved-view route (`GET/POST/GET/PATCH/DELETE /api/v1/saved-views[/{savedView}]`) returns
+`NOT_IMPLEMENTED`. The `SavedFilter` model carries the intended scope columns
+(`created_by_membership_id`, `is_organization_visible`, `TenantScoped`) but no service, no
+visibility/scope `where`, and no policy reads them — so there is no member-vs-organisation filtering
+anywhere. The frontend (`saved-views.ts`) posts `visibility: "member"|"organization"` and reads a
+`visibility` field back against endpoints that currently `501`. No backend saved-view test exists.
+
+This is why TASK-LEAD-025's AC6 (*"A saved view created by one member is not visible to a member
+outside its scope"*) is unverifiable: the behaviour it asserts is unbuilt. Only the *contract* for
+saved-view CRUD was ever scheduled (the LEAD route-contract task); no task implements the CRUD logic,
+so it fell through the plan.
+
+**What closes it:** implement the saved-view CRUD controllers/service with the org-vs-member scope
+`where` and a policy (a backend deliverable, ~M), then AC6 gets its test. Not a qa-integration
+touch-up — it is a feature build, so it is logged here rather than smuggled into LEAD-025.
+
+**Found:** 2026-08-14, TASK-LEAD-025 `/build-slice` exploration.
+
+### ISS-042 · The four system-view count tabs are built but mounted on no real screen
+
+`salesnova_frontend/src/components/leads/lead-views-toolbar.tsx` ·
+`salesnova_frontend/src/components/leads/lead-grid-screen.tsx` ·
+`salesnova_frontend/src/components/leads/lead-table-screen.tsx`
+
+`LeadViewsToolbar` renders the four system-view tabs with `meta.counts` badges (SN-LEAD-012), and the
+backend returns those counts correctly on every `POST /leads/query` (tested by `LeadQueryEngineTest`).
+But the toolbar is referenced only by itself and its own test — neither the grid screen nor the table
+screen mounts it. The grid even caches `meta` and renders only `Pagination`. So the live counts exist
+end to end in libs and tests yet are invisible in the product, and TASK-LEAD-025's AC2 (counts match a
+direct DB count) is provable only at the API layer, not on a screen.
+
+**What closes it:** mount `LeadViewsToolbar` on both lead screens, feeding it the `meta.counts` each
+already fetches. Small, but it is TASK-LEAD-019's frontend seam and blocked in practice by ISS-035
+(the screens cannot load their `meta` in a browser either), so it is logged rather than fixed mid-slice.
+
+**Found:** 2026-08-14, TASK-LEAD-025 `/build-slice` exploration.

@@ -157,7 +157,7 @@ flowchart LR
 | TASK-AUTH-018 | Build data-driven onboarding screen renderer | frontend | M | TASK-AUTH-006, TASK-DESIGN-003 | SN-AUTH-030..033 |
 | TASK-AUTH-019 | Build activation checklist widget | frontend | S | TASK-AUTH-006 | SN-AUTH-040..042 |
 | TASK-AUTH-020 | Build global banner component | frontend | S | TASK-AUTH-006 | SN-AUTH-050 |
-| TASK-AUTH-022 | Integrate onboarding/activation/banners end-to-end | qa | M | TASK-AUTH-012, TASK-AUTH-013, TASK-AUTH-014, TASK-AUTH-018, TASK-AUTH-019, TASK-AUTH-020 | SN-AUTH-030..033, SN-AUTH-040..042, SN-AUTH-050 |
+| TASK-AUTH-022 | Integrate onboarding/activation/banners end-to-end | qa | M | TASK-AUTH-012, TASK-AUTH-013, TASK-AUTH-014, TASK-AUTH-018, TASK-AUTH-019, TASK-AUTH-020, TASK-FIELD-003 | SN-AUTH-030..033, SN-AUTH-040..042, SN-AUTH-050 |
 | TASK-AUTH-024 | QA: verify onboarding/activation/banners | qa | S | TASK-AUTH-022 | SN-AUTH-030..033, SN-AUTH-040..042, SN-AUTH-050 |
 
 ## DATA

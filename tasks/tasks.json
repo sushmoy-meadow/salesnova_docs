@@ -4313,7 +4313,8 @@
       "depends_on": [
         "TASK-AUTH-012",
         "TASK-AUTH-013",
-        "TASK-AUTH-014"
+        "TASK-AUTH-014",
+        "TASK-FIELD-003"
       ],
       "size": "M",
       "acceptance_criteria": [
@@ -4773,7 +4774,7 @@
       "track": "fullstack",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from LEAD-016 + LEAD-024.\n\n\n\n**TASK-LEAD-016 — Implement export engine**\nImplement async, permission-scoped, plan-limited (row count) export producing a signed download link with a 24-hour expiry; every export is audit-logged with requester, filter and row count (SN-LEAD-072).\n\n**TASK-LEAD-024 — Build export request UI**\nBuild the export request form summarising the active filter and row count, submitting the async export request, and surfacing the resulting signed download link (24h expiry) per SN-LEAD-072.",
       "spec_refs": [
         "SN-LEAD-072"
@@ -4800,7 +4801,7 @@
       "track": "frontend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Build /leads/table as the default, mobile-first, compact list view, reading from POST /api/v1/leads/query, with contact actions and new-lead badges rendered per row per SN-LEAD-010 and SN-LEAD-020.",
       "spec_refs": [
         "SN-LEAD-010",
@@ -4949,7 +4950,7 @@
       "track": "qa",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Prove the lead-viewing slices compose over one dataset. The detail screen ships with TASK-LEAD-007 and the query engine with TASK-LEAD-008; this task proves table, grid, saved views and detail agree with each other and with the database when the same lead is changed from any of them. Cover: the four system views and the grid rendering live counts; inline edit in the grid propagating to the table and detail without a refresh; assignment changes appearing as both a timeline event and an audit row; contacted-state derivation and first-response stamping firing from a real interaction; and dwell-gated interaction logging not firing on an incidental hover.",
       "spec_refs": [
         "SN-LEAD-010..014",
@@ -6060,7 +6061,7 @@
       "track": "qa",
       "domain": "TL",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Prove the timeline slices compose over one append-only event log. The writer (TASK-TL-004) is shipped; manual logging and read/query are their own slices. This task proves ordering, permission scoping and immediacy hold when events arrive from several producers at once - manual notes, system events and assignment changes interleaved. Ordering under identical timestamps is the specific risk, since TASK-TL-001 recorded that id alone is not unique for ordering.",
       "spec_refs": [
         "SN-TL-001..005",
