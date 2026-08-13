@@ -10920,7 +10920,7 @@
       "track": "backend",
       "domain": "NOTIF",
       "gate": "G1",
-      "status": "in_progress",
+      "status": "done",
       "description": "Create migrations/models for: notification (recipient membership_id, event_type, payload with only name+event type, no message bodies/phone/email, channel, status, dedup_key, created_at); notification_preference matrix (membership_id, event_type, channel, frequency enum ALWAYS/IF_UPDATES/NEVER); push_subscription (membership_id, VAPID endpoint/keys, last_seen, failure_count); notification_delivery_failure tracking per-member per-channel consecutive failures; email_unsubscribe (membership_id/email, digest vs transactional scope). Add a unique/dedup index on (recipient, event_type, dedup_key) within a 60s rolling window and a grouping-window index supporting >3-of-same-type-in-5-minutes detection.",
       "spec_refs": [
         "SN-NOTIF-011",
