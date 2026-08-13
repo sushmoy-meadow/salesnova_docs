@@ -4521,7 +4521,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define bulk-operation endpoints with a /preview sibling for every mutating bulk action (SN-LEAD-060), selection.mode=FILTER support so a filter can represent all-matching without enumerating ids (SN-LEAD-062), the bulk-delete typed-confirmation endpoint (more than 50 records, SN-LEAD-063), the 5-step CSV import endpoints (upload/map/preview/configure/import, SN-LEAD-070) and its undo endpoint (SN-LEAD-071), and the async export request endpoint (SN-LEAD-072).",
       "spec_refs": [
         "SN-LEAD-060..072"
@@ -4623,7 +4623,7 @@
       "track": "backend",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement lead assignment changes: every change writes a LEAD_ASSIGNED timeline_event and an event row recording previous and new assignee (SN-LEAD-030). assigned_membership_id=NULL is a valid, visible unassigned state; members with the leads.view_unassigned capability see the pool and can claim in one action (SN-LEAD-031). When org_preferences.mark_new_lead_on_reassign is true, reassignment sets is_new=true for the new assignee (SN-LEAD-032).",
       "spec_refs": [
         "SN-LEAD-030..032"
@@ -5092,7 +5092,7 @@
       "track": "backend",
       "domain": "FIELD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define CRUD routes for custom fields, the relative-move reorder endpoints (POST .../move with move UP/DOWN or position AFTER plus relative_to - SN-FIELD-008, explicitly never accepting a full ordered array), the deletion endpoint returning reference counts and 409 CONSTRAINT_VIOLATION when blocked (SN-FIELD-009), autofill-mapping endpoints that return real sample values from recent leads on a source (SN-FIELD-005), reminder configuration endpoints (SN-FIELD-006), and stage-specific fields (order/color_id/is_terminal/outcome, SN-FIELD-020/021). Publish generated types per SN-ARCH-032 - unblocks frontend.",
       "spec_refs": [
         "SN-FIELD-001..009",
@@ -6163,7 +6163,7 @@
       "track": "backend",
       "domain": "CONT",
       "gate": "G2",
-      "status": "pending",
+      "status": "done",
       "description": "Create migrations and Eloquent models for the polymorphic content model per F06 section 1: a content base table (type enum MESSAGE|FILE|PAGE, owner, visibility PRIVATE|SUBTEAM|ORG, status ACTIVE|ARCHIVED|deleted-soft, org-scoped) plus three type-specific detail tables: content_messages (role enum MAIN|FOLLOW_UP|DEFAULT_SHARE, body, per-content-type default flag), content_files (processing_state enum NOT_PROCESSED|PROCESSING|PROCESSED|WILL_NOT_PROCESS|FAILED, size, page_count, storage_key, cdn_url, rendered_derivative_key), content_pages (blocks JSONB ordered array of slot_key/type/value/style per SN-CONT-032, default_page_cta enum). Add folders (hierarchical, self-referencing parent_id, one folder per content item), labels (many-to-many via content_labels), content_shared_folder_grants (grantee membership/subteam, revoked_at nullable per SN-CONT-051), stat columns/materialized view feeding total_shared/total_opened/total_unopened (SN-CONT-041), a private_notes text column (SN-CONT-044), and viewed_recently_window_days in org preferences (default 7, SN-CONT-042). All tables carry the standard tenant scope column and use Spring/Laravel built-in created_at/updated_at auditing, never SQL triggers. Add indexes on (org_id, type, folder_id), (org_id, visibility), and a GIN index on labels/blocks JSONB.",
       "spec_refs": [
         "SN-CONT-001..006",
@@ -10920,7 +10920,7 @@
       "track": "backend",
       "domain": "NOTIF",
       "gate": "G1",
-      "status": "pending",
+      "status": "in_progress",
       "description": "Create migrations/models for: notification (recipient membership_id, event_type, payload with only name+event type, no message bodies/phone/email, channel, status, dedup_key, created_at); notification_preference matrix (membership_id, event_type, channel, frequency enum ALWAYS/IF_UPDATES/NEVER); push_subscription (membership_id, VAPID endpoint/keys, last_seen, failure_count); notification_delivery_failure tracking per-member per-channel consecutive failures; email_unsubscribe (membership_id/email, digest vs transactional scope). Add a unique/dedup index on (recipient, event_type, dedup_key) within a 60s rolling window and a grouping-window index supporting >3-of-same-type-in-5-minutes detection.",
       "spec_refs": [
         "SN-NOTIF-011",
@@ -11258,7 +11258,7 @@
       "track": "backend",
       "domain": "SET",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define routes, validation, policies and generated TS types for: granular single-key PATCH /api/v1/settings/{scope}/{key} writes applying immediately with no save button; inclusion of both preference scopes in the /bootstrap payload so no screen fetches its own settings; profile fields endpoint and the change-email OTP flow; org lead-settings endpoints for duplicate policy and unmark triggers; branding endpoints including a live-preview render contract against the real share viewer and lead form plus WCAG AA contrast validation (warn, not block); security endpoints (sessions/devices list+revoke, audit log filter/export, data export and account deletion). Enforce that every org-scoped change writes an audit_log entry with before/after values, and that locked user-scoped settings render disabled server-side too.",
       "spec_refs": [
         "SN-SET-003",
