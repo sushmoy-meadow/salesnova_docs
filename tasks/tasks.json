@@ -9861,7 +9861,7 @@
       "track": "backend",
       "domain": "TEAM",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Create migrations and Eloquent models for: (1) sub_teams table (id, org_id FK, name, timestamps; deletion just removes scoping rows); (2) accessible_subteam_ids array column (Postgres integer[] with GIN index) on membership, empty array meaning unrestricted; (3) invitation lifecycle fields on membership/invitation (status enum INVITED/ACTIVE/DEACTIVATED, invite token, token_invalidated_at, resend/cancel audit trail); (4) lead_escalation_config table (org_id, threshold_minutes default 30, escalate_to enum, channels, also_for_leads_assigned_to_others bool, auto_reassign_after_minutes nullable); (5) escalation_event_log table to dedupe notified-once per lead. All FKs scoped to org_id. Add indexes on org_id+status for membership list filtering.",
       "spec_refs": [
         "SN-TEAM-003",
