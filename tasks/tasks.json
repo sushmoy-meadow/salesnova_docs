@@ -5169,7 +5169,7 @@
       "track": "fullstack",
       "domain": "FIELD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from FIELD-005 + FIELD-007.\n\n\n\n**TASK-FIELD-005 — Implement stage-history tracking and relative-move reordering**\nAppend to custom_field_value_history on every change to the LEAD_STAGE system field and to any DROPDOWN field flagged track_history (SN-FIELD-007; note this is explicitly not backfillable). Implement conflict-free relative-move reordering (UP/DOWN/AFTER) so two managers reordering simultaneously cannot silently overwrite each other (SN-FIELD-008). Implement terminal-stage semantics: is_terminal stages with outcome WON/LOST drive conversion reporting, exclude the lead from needs-follow-up prompts, and break active sequences by default (SN-FIELD-020); every stage change writes a LEAD_STAGE_CHANGED timeline event with from/to/who/when (SN-FIELD-021).\n\n**TASK-FIELD-007 — Build lead-stage configuration UI**\nBuild the stage editor within custom fields settings: ordered, coloured options with is_terminal + outcome (WON/LOST) flags per SN-FIELD-020/021.",
       "spec_refs": [
         "SN-FIELD-007",

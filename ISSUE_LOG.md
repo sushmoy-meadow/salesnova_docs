@@ -559,6 +559,146 @@ frontend's feed call moved with them.
 
 ---
 
+### ISS-028 · The lead grid cannot reach the API from a browser at all
+
+`salesnova_frontend/src/components/leads/lead-grid-screen.tsx:1` ·
+`salesnova_frontend/src/lib/auth/api-envelope.ts:48`
+
+`LeadGridScreen` is a `"use client"` component and calls `fetchLeadQuery(request)` with no
+`baseUrl`. `resolveApiRoot` then falls back to `process.env.SALESNOVA_API_URL`, which carries no
+`NEXT_PUBLIC_` prefix and so is not inlined into the client bundle. In a browser the value is
+`undefined` and the function throws `SALESNOVA_API_URL is not configured` before any request is
+made. Every inline cell write — `updateLeadCell` — sits behind the same envelope and fails the same
+way.
+
+Two distinct faults are stacked here and the first hides the second. Even given a base URL, nothing
+on the client attaches a credential: `requestEnvelope` sends `accept: application/json` and whatever
+the caller passes, and the only source of an `authorization` header is `requireOrganizationSession()`
+in `src/lib/auth/session-gate.ts`, which reads a cookie the browser cannot read and therefore runs on
+the server alone. So the grid would 401 the moment it was given a root.
+
+The cost is that the lead grid renders its chrome, its column menu and its pagination, and lists
+nothing — in tests it is fully exercised because Vitest passes a `fetcher` and a `baseUrl` directly,
+which is why both gates are green over it. It is the built surface every lead-facing slice is
+demoed against, so this blocks their demos and not only its own.
+
+**What closes it:** a decision on the transport, then the wiring. Auth already established the shape
+in [ADR-0071](adr/0071-the-refresh-cookie-is-set-on-our-own-origin-so-the-auth-routes-are-proxied.md)
+— the browser talks to our own origin and a route handler forwards with the credential — and
+`src/app/api/health` and `src/app/api/search` are the two that exist. Extending that to the lead
+query and the cell writes keeps the token out of the bundle and needs no new env var. The
+alternative, publishing `NEXT_PUBLIC_SALESNOVA_API_URL` and holding a token client-side, contradicts
+0071 and should not be taken without superseding it.
+
+**Found:** 2026-08-13, building TASK-FIELD-005, proving the seam.
+
+---
+
+### ISS-029 · The lead list publishes no ETag, so every inline edit is unconditional
+
+`salesnova_backend/app/Services/Leads/LeadQueryService.php` ·
+`salesnova_backend/app/Support/Http/EntityTagger.php` ·
+`salesnova_frontend/src/lib/leads/lead-cell-update.ts:60`
+
+`EnsureOptimisticConcurrency` requires `If-Match` on a cell write but accepts `*`.
+`EntityTagger::for()` hashes *all* of a model's attributes, and the lead query selects a subset of
+columns for speed, so a tag computed from a list row could never match the one the middleware
+recomputes from the full record. The list therefore publishes `etag: null` on every row and the web
+app sends `If-Match: *`.
+
+The cost is that the concurrency check is present and inert exactly where it was meant to bite: two
+reps editing the same lead's stage in the grid both succeed, last write wins, and neither is told.
+The middleware is doing its job — nothing is bypassed — but no caller is in a position to give it
+anything to compare.
+
+**What closes it:** either a tag derived from a stable subset of columns the list can select and the
+detail endpoint can reproduce (`updated_at` and the primary key would do), or the list selecting
+enough to compute the full-attribute hash. The first is cheaper and is the one to cost first. Until
+then `If-Match: *` is honest about what the client knows, and is commented as such at the call site.
+
+**Found:** 2026-08-13, building TASK-FIELD-005.
+
+---
+
+### ISS-030 · The AI settings page fetches without a credential
+
+`salesnova_frontend/src/app/settings/ai/page.tsx`
+
+`fetchAiSettings` is called from a server component but is not given the headers from
+`requireOrganizationSession()`, so the request reaches the API unauthenticated and the page renders
+its degraded state permanently. Same root as the second half of ISS-028 — `requestEnvelope` attaches
+no credential of its own — but on the server, where the fix is one call and already used elsewhere
+(`src/app/settings/custom-fields/stages/page.tsx` does it).
+
+Not fixed here because it is another task's screen and the fix wants that task's tests around it.
+
+**What closes it:** thread `const { headers } = await requireOrganizationSession()` into the fetch,
+with a test that the header is sent. Worth a sweep for other server-side callers with the same gap
+while it is being done.
+
+**Found:** 2026-08-13, building TASK-FIELD-005.
+
+---
+
+### ISS-031 · Three modules version the API path a second time and 404 on every request
+
+`salesnova_frontend/src/lib/ai/ai-settings.ts:13` ·
+`salesnova_frontend/src/lib/leads/lead-query.ts:17` ·
+`salesnova_frontend/src/lib/leads/saved-views.ts:14`
+
+`.env.example` documents `SALESNOVA_API_URL` as "root of the SalesNova API, **including its version
+prefix**", and the local value is `http://localhost:8000/api/v1`. The original callers agree —
+`login-request.ts` posts to `/auth/logout`, `bootstrap.ts` gets `/bootstrap`. These three prepend
+`/v1` themselves, so the request goes to `/api/v1/v1/...` and the API answers 404. Every screen they
+back renders its degraded state, permanently, on a correctly configured environment.
+
+`src/lib/fields/stages.ts` had the same bug and is fixed, which is how this was found: the stage
+settings page rendered "The stage list is not available right now" against a live API that answered
+the same request correctly under curl.
+
+Nothing caught it because every test injects `baseUrl` and asserts the URL it was given —
+`lead-cell-update.test.ts:72` asserts `https://api.test/v1/leads/lead_1/assignee` and passes, since
+the fixture root has no version in it. The test and the environment disagree about what `baseUrl`
+means and neither is written down anywhere the other can see.
+
+**What closes it:** drop the `/v1` from the three constants, and change their tests to use a fixture
+root that carries the version (`https://api.test/api/v1`) so the assertion can tell the two apart.
+`src/lib/fields/stages.test.ts` does it that way and is the pattern. Not fixed here because each
+belongs to a task with its own tests around it, and the fix has to move the test fixture with it.
+Worth a grep for `"/v1/` at the same time — the four found are all of them today.
+
+**Found:** 2026-08-13, building TASK-FIELD-005, proving the seam.
+
+---
+
+### ISS-032 · Onboarding and the app shell disagree on completeness, looping /onboarding ⇄ /welcome
+
+`salesnova_frontend/src/app/(app)/layout.tsx:75` ·
+`salesnova_frontend/src/app/onboarding/page.tsx`
+
+With a membership whose onboarding answers cover every screen in the sequence — `screenFor(...)`
+returns `is_complete: true`, confirmed directly against the backend — a browser hitting any `(app)`
+route enters an infinite redirect: `/onboarding → /welcome → /onboarding → …`, ending in
+`ERR_TOO_MANY_REDIRECTS`. The `(app)` layout redirects to `/onboarding` when
+`bootstrap.onboarding.is_complete` is false; the `/onboarding` page redirects away to `/welcome`
+when it reads complete. The two are reading the same fact and reaching opposite answers in the same
+instant, so each bounces the request straight back to the other.
+
+The cost is that a fully-onboarded member cannot reach the app at all — every route is a loop. It
+did not surface until now because the seeded orgs the app is usually demoed against sit on one side
+of the disagreement or the other consistently; this account landed exactly on the seam by having its
+onboarding completed mid-session.
+
+**What closes it:** one source of truth for "onboarding complete" that both the layout and the
+onboarding page read, so they cannot disagree — most likely the layout and the page must derive it
+from the same bootstrap read in the same request rather than each computing its own. Worth checking
+whether `/welcome` is even the right post-onboarding destination, since the layout does not treat it
+as exempt. Not this slice's code; found while trying to reach the lead grid for the FIELD-005 demo.
+
+**Found:** 2026-08-13, building TASK-FIELD-005, proving the seam.
+
+---
+
 ## Closed
 
 ### ISS-025 · ADR-0063 specifies a merge request shape that the shipped endpoint does not accept

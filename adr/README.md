@@ -99,3 +99,4 @@ Status · Date · Deciders
 | [0070](0070-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md) | Google arrives by redirect, and the browser never holds the credential | Accepted |
 | [0071](0071-the-refresh-cookie-is-set-on-our-own-origin-so-the-auth-routes-are-proxied.md) | The refresh cookie is set on our own origin, so the auth routes are proxied | Accepted |
 | [0072](0072-the-built-endpoint-decides-its-contract-where-it-differs-from-the-stub.md) | The built endpoint decides its contract where it differs from the stub | Accepted |
+| [0073](0073-stage-options-are-a-sub-resource-and-move-one-at-a-time.md) | Stage options are a sub-resource, and move one at a time | Accepted |
