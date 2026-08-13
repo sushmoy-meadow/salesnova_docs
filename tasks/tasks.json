@@ -2102,7 +2102,7 @@
       "track": "frontend",
       "domain": "DESIGN",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Implement ContactActionBar per docs/07-design-system.md SN-DS-033, described there as the most important component in the product. Renders Call, WhatsApp, Email, SMS actions, configurable and orderable per settings (F18 SN-SET-020, external). Must be positioned above the fold on lead detail at every breakpoint, and sticky to the bottom of the viewport on mobile (base breakpoint per SN-DS-060). Rendered at lg size (48px) with labels always visible (never icon-only, per section 2 principle 4). WhatsApp action must be visually distinguished as the default action (used for ~80% of contacts). Built on the Button/IconButton primitives from D-03B.",
       "spec_refs": [
         "SN-DS-033",
@@ -4544,7 +4544,7 @@
       "track": "fullstack",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from LEAD-007 + LEAD-020.\n\n\n\n**TASK-LEAD-007 — Implement lead CRUD, phone parsing and contactability validation**\nImplement lead create/update logic: parse phone input via libphonenumber using the orgs default country when no country code is present, reject unparseable numbers at the boundary with a clear 422 INVALID_PHONE (SN-LEAD-004); enforce contactability at the application layer to match the DB CHECK (422 VALIDATION_FAILED, SN-LEAD-002); persist source_payload verbatim and keep it separate from the free-text notes field (SN-LEAD-005); when only phone or only whatsapp is supplied, copy the value to the other field and set whatsapp_inferred=true (SN-LEAD-003).\n\n**TASK-LEAD-020 — Build lead detail screen**\nBuild the lead detail screen composition per SN-LEAD-021: header (name/assignment/stage/new badge), contact actions (Call/WhatsApp/Email/SMS/Share content/More) reachable without scrolling at every breakpoint including long timelines (SN-LEAD-020), follow-up section, inline-editable info block (display name/phone/WhatsApp/email/custom fields/stage+time-in-stage/groups/notes), collapsed source section showing structured source_payload, and the unified timeline (rendered by the TL domains timeline component, consumed here). Implement the 2-second dwell-gated interaction POST client-side (SN-LEAD-023).",
       "spec_refs": [
         "SN-LEAD-001..005",
@@ -4717,7 +4717,7 @@
       "track": "fullstack",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from LEAD-014 + LEAD-022.\n\n\n\n**TASK-LEAD-014 — Implement bulk operations engine (preview, partial success, filter selection)**\nImplement bulk mutation execution with per-record permission enforcement: ineligible records are skipped and reported in skipped_detail (reason, count, sample_ids), never silently dropped and never failing the whole batch (SN-LEAD-061). Implement selection.mode=FILTER resolution so select-all-N-matching works without id enumeration (SN-LEAD-062). Implement the more-than-50-record bulk-delete guard requiring typed confirmation of the count, executing as a 30-day-recoverable soft delete (SN-LEAD-063). Every mutating bulk action must have a working /preview computation (SN-LEAD-060).\n\n**TASK-LEAD-022 — Build bulk action UI**\nBuild selection UI supporting both explicit id selection and select-all-N-matching FILTER mode (SN-LEAD-062), a preview step before every bulk commit (SN-LEAD-060), a partial-success result report showing skipped_detail reasons and counts (SN-LEAD-061), and the typed-count-confirmation dialog for bulk delete over 50 records (SN-LEAD-063).",
       "spec_refs": [
         "SN-LEAD-060..063"
@@ -4743,7 +4743,7 @@
       "track": "fullstack",
       "domain": "LEAD",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Backend and the UI that renders it are one deliverable: this slice is not done until a person can exercise it in a browser against the live implementation. Merged from LEAD-015 + LEAD-023.\n\n\n\n**TASK-LEAD-015 — Implement CSV import engine with per-row errors and 7-day undo**\nImplement the 5-step import pipeline (upload presigned up to 10MB/10,000 rows, column mapping incl. custom fields, preview of first 10 rows, per-batch configuration of duplicate policy/assignee/groups/tags, async import with progress) per SN-LEAD-070. Every batch creates an import_batch with per-row results; failed rows must be downloadable as a corrected-format CSV. Implement 7-day batch undo that removes only leads created by that batch, leaving merges and subsequent edits intact where possible and reporting what could not be reverted (SN-LEAD-071).\n\n**TASK-LEAD-023 — Build CSV import wizard UI**\nBuild the 5-step import wizard (upload, map columns with auto-suggestion, preview first 10 rows, configure duplicate policy/assignee/groups/tags, async import with progress and per-row error report) with a downloadable corrected-format CSV for failed rows and a 7-day undo action, per SN-LEAD-070/071.",
       "spec_refs": [
         "SN-LEAD-070",
@@ -14452,12 +14452,13 @@
         {
           "id": "R-TASK-HARDEN-009.4",
           "type": "blocked_on_unbuilt",
-          "status": "open",
+          "status": "closed",
           "text": "No caller formats a phone number or a sum yet — `PhoneNumber` and `Money` are covered by their own tests and used by nothing else, because the lead and billing endpoints that will hand them a number and an invoice total are not built.",
           "closes_when": [
             "TASK-LEAD-007"
           ],
-          "source": "TASK-HARDEN-009-open-points.md"
+          "source": "TASK-HARDEN-009-open-points.md",
+          "closed_by": "TASK-LEAD-007"
         }
       ]
     },

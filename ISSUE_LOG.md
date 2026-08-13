@@ -669,6 +669,15 @@ Worth a grep for `"/v1/` at the same time — the four found are all of them tod
 
 **Found:** 2026-08-13, building TASK-FIELD-005, proving the seam.
 
+**Update 2026-08-14 (TASK-LEAD-007):** a fifth instance —
+`salesnova_frontend/src/lib/leads/lead-cell-update.ts:38,45` builds `/v1/leads/${leadId}/…` the same
+way. So "the four found are all of them today" was one short; the grep missed it because its path is
+assembled in a helper rather than a top-of-file constant. It backs the grid's inline edits
+(TASK-LEAD-018), so every grid cell edit 404s on a correctly configured environment. The detail
+screen's notes edit does not go through it — it uses `lead-detail.ts`, which versions the path
+correctly — so this slice's demo was unaffected. Same fix and same test-fixture move as the other
+four.
+
 ---
 
 ### ISS-032 · Onboarding and the app shell disagree on completeness, looping /onboarding ⇄ /welcome
@@ -696,6 +705,37 @@ whether `/welcome` is even the right post-onboarding destination, since the layo
 as exempt. Not this slice's code; found while trying to reach the lead grid for the FIELD-005 demo.
 
 **Found:** 2026-08-13, building TASK-FIELD-005, proving the seam.
+
+---
+
+### ISS-033 · The inline-edit cell controller answers only the stage cell; the rest are 501
+
+`salesnova_backend/app/Http/Controllers/Client/Leads/LeadCellUpdateController.php`
+
+`LeadCellUpdateController` backs six PATCH routes — assignee is its own controller, and this one
+serves stage, groups, follow-up, notes and custom-fields. Only the stage route was implemented:
+`stageDefinition()` throws `NOT_IMPLEMENTED` for any route name other than `customer.leads.stage.update`,
+and the recorder it delegates to only handles dropdown custom fields. So groups, follow-up and
+notes each returned a 501 "The remaining cells are not built yet." for anyone who tried them.
+
+The cost is that TASK-LEAD-018 (grid inline editing of assignee, stage, groups, follow-up, notes and
+custom fields) was closed with only two of its six cells actually writable — the others answer 501
+against a live server. Nothing failed because no test drove a non-stage cell to a 200, and the grid's
+own tests inject the path (ISS-031) and never reach the API.
+
+**Fixed here for notes only:** the detail screen's "edited and re-read" demo needs a working write,
+and notes is the info-block field it edits, so `LeadCellUpdateController` now short-circuits the notes
+route to `LeadWriter::updateNotes()` (a blank box stores null, the structured `source_payload` is left
+untouched), covered by `LeadNotesUpdateTest`. **Still open:** the groups, follow-up and custom-field
+cells remain 501, and the grid that depends on them is marked done. Each needs its own writer and a
+test that drives it to a 200 — most naturally reopened under TASK-LEAD-018 or a follow-up to it.
+
+A smaller sibling smell, not fixed: the dwell interaction (SN-LEAD-023) has no view-shaped type in the
+contract. `LeadInteractionRequest` reuses the manual-activity type enum (`NOTE|CALL|MEETING|MESSAGE`),
+so the client's "mark seen" POST borrows `NOTE` — the endpoint records no timeline entry regardless of
+type, so it is harmless, but a reader will reasonably expect a `VIEW`.
+
+**Found:** 2026-08-14, building TASK-LEAD-007, proving the seam.
 
 ---
 
@@ -898,3 +938,69 @@ Only use one where the field is genuinely optional in the contract, never to pap
 API has not shipped yet.
 
 ---
+
+### ISS-034 · The bulk seam double-prefixed `/v1`, so every bulk call 404'd server-side — closed 2026-08-14
+
+`salesnova_frontend/src/lib/leads/bulk-operations.ts`
+
+`BULK_ROOT` was `/v1/leads/bulk`. The seam is invoked only from a server action, where the base URL
+is `SALESNOVA_API_URL` and already ends in `/api/v1`, so the first live preview 404'd on
+`/api/v1/v1/leads/bulk/delete/preview`. The unit tests never caught it: they pass an explicit
+`baseUrl` without a version and asserted the doubled path, so the `/v1` looked deliberate.
+
+Fixed by dropping the `/v1` — `BULK_ROOT` is now `/leads/bulk`, matching the convention already
+spelled out in `src/lib/fields/stages.ts`, the other server-invoked seam. The three URL assertions in
+`bulk-operations.test.ts` were corrected to the single-prefix path.
+
+**Carry-over rule:** a seam's `/v1` prefix belongs only where the seam is called from the browser,
+where the base carries no version. A server-action seam must start its path at the resource. The two
+contexts read the same in a unit test with a version-less `baseUrl` — only a live request tells them
+apart, which is why the demo is the gate.
+
+**Found:** 2026-08-14, building TASK-LEAD-014, exercising the bulk-delete demo in a browser.
+
+---
+
+### ISS-035 · The lead grid renders no rows in a browser — its list fetch is unauthenticated and off-contract
+
+`salesnova_frontend/src/components/leads/lead-grid-screen.tsx:147` ·
+`salesnova_frontend/src/lib/leads/lead-query.ts`
+
+The grid's rows come from `fetchLeadQuery` called inside a client `useQuery`, with no options. Two
+independent faults keep it from ever returning data in a real browser:
+
+- **No auth.** The call carries no bearer token — the token lives in the server session, unreachable
+  from client code — so the request is a bare `POST` to `:8000` and comes back `401`.
+- **Off-contract body.** For the common unfiltered list, `toLeadQueryRequest` omits `filters`
+  entirely, but the query endpoint's `ComplexQueryRequest` requires `filters.conditions` with
+  `min:1`. So even authenticated, the default grid load is a `422`.
+
+The net effect is that the lead grid (TASK-LEAD-007) shows "The lead grid could not be loaded" for
+every real visit; it passes its own tests only because they inject a mock fetcher with a `baseUrl`
+and never touch the API. The list load looks like it wants to be a server action (like the page's own
+`fetchStages`), so that the token and the version-carrying base are both in scope — the same shape the
+bulk actions in this slice use.
+
+Not fixed here — it is TASK-LEAD-007's seam, not this slice's. Worked around for the TASK-LEAD-014
+demo by priming the grid's query cache with the real seeded rows (see the demo record), which leaves
+the bulk preview/execute running for real against the backend.
+
+**Found:** 2026-08-14, building TASK-LEAD-014, trying to reach the grid for the bulk demo.
+
+---
+
+### ISS-036 · The import upload/commit steps validate the file and batch-id in the controller, not the FormRequest
+
+`salesnova_backend/app/Http/Controllers/Client/Leads/LeadImportController.php:39` ·
+`salesnova_backend/app/Http/Requests/Client/Leads/LeadImportRequest.php`
+
+`LeadImportController` hand-checks that `upload` carries a file and that a commit carries an
+`import_batch_id`, returning `VALIDATION_FAILED` itself. Both are conditional-on-step required-field
+rules, which the repo otherwise keeps in the FormRequest. A `Rule::requiredIf` keyed on the route
+step (`$this->route('step')`) would move them there and keep the controller purely transport.
+
+Left as-is: the branch is small and reads clearly, the request would still need to know the route
+step, and the two checks respond through the same `ApiResponse` trait. Noted so the next hand at this
+controller can lift them if the wizard grows more per-step rules.
+
+**Found:** 2026-08-14, TASK-LEAD-015 simplify pass (altitude lens).
