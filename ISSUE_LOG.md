@@ -479,7 +479,19 @@ wrote them rather than a patch.
 0062, 0063 and 0064 so that every number addresses one file. A `validate`-style check that every
 index row resolves to a file, and every file appears once, is what stops it recurring.
 
-**Found:** 2026-08-13, while indexing ADR-0069.
+**Found:** 2026-08-13, while indexing ADR-0070.
+
+**Updated 2026-08-13, on merging `origin/main`.** Half of this resolved itself and the other half
+got worse. The three files do now exist — they arrived with the LEAD and TL work, so the index rows
+were written ahead of them rather than pointing at anything lost. The doubling at 0062, 0063 and
+0064 is untouched by that and still needs renumbering.
+
+What is new is that it happened again while this was open: 0069 was taken by
+`0069-subteam-scope-keeps-uuid-jsonb-storage.md` and, independently, by the Google redirect
+decision. Two developers picking the next free number from two checkouts will keep colliding until
+something allocates it. The Google and refresh-proxy ADRs were moved down to 0070 and 0071 to clear
+it, because the other side was already published; every reference to them moved with them. That is a
+third instance, not a fix — a number nobody allocates is the defect.
 
 ---
 

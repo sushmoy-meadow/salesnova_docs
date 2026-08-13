@@ -1,4 +1,4 @@
-# ADR-0070 — The refresh cookie is set on our own origin, so the auth routes are proxied
+# ADR-0071 — The refresh cookie is set on our own origin, so the auth routes are proxied
 
 **Status:** Accepted · **Date:** 2026-08 · **Deciders:** Engineering
 

@@ -61,6 +61,7 @@ app/
     Leads/LeadAssigned.php          App\Events\Leads\LeadAssigned
   Contracts/
     Timeline/EventWriter.php        App\Contracts\Timeline\EventWriter
+    Timeline/TimelineEventWriter.php App\Contracts\Timeline\TimelineEventWriter
 ```
 
 There is no `Domains` directory. A module's code is everything under its segment across every
@@ -75,6 +76,7 @@ The interfaces that carry that traffic live in `app/Contracts/{Domain}/`. In for
 ```
 PushSubjectInterface      Notifications ← any record       app/Contracts/Notifications
 EventWriter               Timeline ← any module            app/Contracts/Timeline
+TimelineEventWriter       Timeline ← Leads                 app/Contracts/Timeline
 EventReader               Timeline ← tooling               app/Contracts/Timeline
 SeatLimitResolver         Organizations ← Billing          app/Contracts/Billing
 ```
@@ -87,6 +89,12 @@ is the absence of anything else to call rather than a rule each caller has to re
 a reference DTO rather than the model, so appending an event never hands another module a row it
 could write through. A test rule fails the build if anything outside the timeline module reaches the
 table or the model directly.
+
+`TimelineEventWriter` is the narrow write port for system-generated lead assignment history.
+Leads supplies the organisation, lead, previous and new memberships, event name, instant and
+optional actor; the Timeline adapter owns the `timeline_event` row and keeps that persistence
+behind the module boundary. Assignment changes must use this port alongside `EventWriter`, so the
+timeline and append-only event log record the same transition.
 
 `EventReader` is the read half, for tooling that has to reconstruct what happened — breach impact,
 analytics preparation, a question about one chain. `find(EventQueryDTO)` filters by event type and

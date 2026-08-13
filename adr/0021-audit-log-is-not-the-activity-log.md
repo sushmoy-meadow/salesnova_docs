@@ -41,7 +41,7 @@ through `LogsActivity`. Everything else goes to `activity_log` and never to `aud
 
 ### Write points
 
-One row per case of `AuditAction`. Eight requirements become eleven actions: impersonation and both
+One row per case of `AuditAction`. Eight requirements become twelve actions: impersonation and both
 connect/disconnect pairs are two write points each, because a trail that cannot answer *when did
 this end* is not evidence.
 
@@ -52,6 +52,7 @@ this end* is not evidence.
 | `IMPERSONATION_STARTED` | Agency or support staff begin acting as a member of another organization | `membership` | `audit_log` |
 | `IMPERSONATION_ENDED` | That session is ended or expires | `membership` | `audit_log` |
 | `BILLING_CHANGED` | Plan, seat count, payment method or subscription state changes, whether driven by a member or by a provider webhook | `subscription` | `audit_log` |
+| `SETTINGS_CHANGED` | An organization-scoped setting is changed | `organization_setting` | `audit_log` |
 | `DATA_EXPORTED` | An export is produced — leads, contacts, reports, anything leaving the tenant as a file | `export` | `audit_log` |
 | `INTEGRATION_CONNECTED` | An integration connection is authorised | `integration_connection` | `audit_log` |
 | `INTEGRATION_DISCONNECTED` | An integration connection is revoked, by a member or by the provider | `integration_connection` | `audit_log` |
@@ -68,9 +69,6 @@ null.
 SN-SEC-010 and SN-SEC-016 list overlapping but unequal sets. SN-SEC-010 adds two write points and
 words a third differently:
 
-- **Settings changes** — a future `SETTINGS_CHANGED`. Not cased now because "settings" has no
-  boundary yet; branding, org profile and notification preferences are three different tables, and
-  a single case covering all of them would be a label rather than an action.
 - **Login from a new device** — a future `LOGIN_FROM_NEW_DEVICE`. Not cased now because there is no
   device identity to compare against; it depends on session and device-fingerprint work that has not
   landed.

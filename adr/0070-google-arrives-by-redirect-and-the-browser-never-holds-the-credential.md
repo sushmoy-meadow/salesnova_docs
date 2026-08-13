@@ -1,4 +1,4 @@
-# ADR-0069 — Google arrives by redirect, and the browser never holds the credential
+# ADR-0070 — Google arrives by redirect, and the browser never holds the credential
 
 **Status:** Accepted · **Date:** 2026-08 · **Deciders:** Engineering
 

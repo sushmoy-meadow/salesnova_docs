@@ -17,7 +17,7 @@ They had not landed when this task closed, so neither was in scope and both entr
 exercised only to the point of confirming they were dead links.
 
 **Now decided:**
-[ADR-0069](../adr/0069-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).
+[ADR-0070](../adr/0070-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).
 Google is a server-side authorization-code redirect run by the web app — no Google SDK anywhere, no
 credential in the browser, and `/login/google` and `/signup/google` become route handlers rather
 than pages, so both stay plain links that work unhydrated. The API's contract does not move: it
@@ -36,7 +36,7 @@ therefore ends hard at the access token's fifteen minutes, and a replay cannot b
 browser at all. It was demonstrated against the live API directly instead.
 
 **Now decided:**
-[ADR-0070](../adr/0070-the-refresh-cookie-is-set-on-our-own-origin-so-the-auth-routes-are-proxied.md).
+[ADR-0071](../adr/0071-the-refresh-cookie-is-set-on-our-own-origin-so-the-auth-routes-are-proxied.md).
 A Next route handler proxies `/api/v1/auth/*` so the cookie is set on our own origin and the browser
 holds it. The API is untouched and cannot tell the difference.
 

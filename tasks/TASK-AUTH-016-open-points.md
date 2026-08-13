@@ -20,7 +20,7 @@ returned `AccountSession` is validated and then dropped. Nothing here establishe
 ## Google signup is an entry point without a handshake
 
 > **Decided 2026-08-13 —
-> [ADR-0069](../adr/0069-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
+> [ADR-0070](../adr/0070-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
 > A server-side authorization-code redirect, run by the web app: no Google SDK anywhere, no
 > credential in the browser, and both entry points stay plain links. Not built yet, so the rest of
 > this section is still an accurate description of the code.
@@ -50,7 +50,7 @@ guarded.
 ## The captcha renders its failure but is not mounted
 
 > **Decided 2026-08-13 —
-> [ADR-0069](../adr/0069-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
+> [ADR-0070](../adr/0070-google-arrives-by-redirect-and-the-browser-never-holds-the-credential.md).**
 > Turnstile is mounted as a plain script tag, not a React island: `SN-AUTH-010` forbids requiring
 > the application bundle, which a third-party script does not. The cost it accepts is that a
 > visitor with JavaScript off can no longer request a code, which is `SN-AUTH-004`'s own trade.
