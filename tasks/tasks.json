@@ -2841,7 +2841,9 @@
         "TASK-AUTH-005",
         "TASK-AUTH-006",
         "TASK-AUTH-012",
-        "TASK-AUTH-013"
+        "TASK-AUTH-013",
+        "TASK-CAMP-001",
+        "TASK-WA-001"
       ],
       "size": "L",
       "acceptance_criteria": [

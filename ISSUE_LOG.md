@@ -1164,3 +1164,72 @@ already fetches. Small, but it is TASK-LEAD-019's frontend seam and blocked in p
 (the screens cannot load their `meta` in a browser either), so it is logged rather than fixed mid-slice.
 
 **Found:** 2026-08-14, TASK-LEAD-025 `/build-slice` exploration.
+
+### ISS-043 · TASK-UX-003's demo (and AC5) end on the WhatsApp template + outbound-send subsystem, which is unbuilt and not in its dependency graph
+
+`salesnova_frontend/src/lib/contact/contact-channels.ts:86-89` ·
+`salesnova_frontend/src/components/leads/lead-list-surface-state.ts:45-50` ·
+`salesnova_backend/app/Services/Timeline/TimelineActivationSignals.php:21-38` (recognises
+`WHATSAPP_OUTBOUND`/`WHATSAPP_TEMPLATE_SENT` events that nothing in the backend produces)
+
+UX-003's first acceptance criterion — the slice's demo — is *"A brand-new user completes signup
+through to sending their first message against live services, inside the flow's stated time budget."*
+The spine (signup identifier → OTP verify → profile → server-driven onboarding → add lead → lead
+detail with the ContactActionBar) is genuinely **live** and exercisable against the real API. The
+terminal two steps of the journey are not:
+
+- **Step 8 "tap WhatsApp opens composer with a seeded template"** is a bare `https://wa.me/<digits>`
+  anchor with **no `?text` and no in-app composer** (`contact-channels.ts:86-89`); the bar is by
+  design a Server Component of deep-links. No seeded template is prefilled because none exists.
+- **Step 9 "send → activation checklist advances"** cannot occur from a `wa.me` tap, which records
+  nothing. `SEND_FIRST_MESSAGE` flips only on a `MESSAGE`/`WHATSAPP_OUTBOUND` timeline event
+  (`TimelineActivationSignals.php:21-38`), and nothing writes one from this path.
+- **AC5** (*"industry selection produces real seeded stages/fields/templates"*) is unmet on the
+  templates half: `OnboardingIndustryPresets` seeds stages + custom fields, but there is **no
+  message-template model, migration, seeding handler, or send path anywhere in the backend**.
+
+All of that belongs to a separate domain — WhatsApp / template / content — of ~40 tasks, nearly all
+`pending`: **TASK-CAMP-001** (Create WhatsApp template schema), **TASK-CAMP-008** (pre-built template
+library), **TASK-WA-001/003/006/007** (WhatsApp account+message schema, provider, onboarding, send),
+**TASK-UX-009** (Slice: Flow 3 – WhatsApp connection), **TASK-CONT-002/003** (message contract +
+editor). **None is in UX-003's `depends_on`** (which were DESIGN/ARCH/AUTH/LEAD, all `done`). Exactly
+as ISS-040, the slice's demo needs a deliverable its dependency graph never required.
+
+Lesser in-scope gaps on the same path, logged rather than fixed during a stop:
+
+- Google "Continue with Google" is a dead link — see ISS-044.
+- The leads empty-state offers only *"Add a lead"*, not the flow's Add / Import / Connect-a-source
+  trio (`lead-list-surface-state.ts:49`).
+- Signup OTP verify is a cookie-refresh-safe query-param stage (`/signup?stage=VERIFICATION`), not
+  its own URL as Flow 1 specifies (only `/login/verify` is a dedicated route).
+- No demo-lead seeding: a new org lands on the empty state, not a "seeded, never-empty" list. The
+  empty state is still usable (AC4 holds), so this is a wording deviation, not a break.
+
+**What closes it:** the WhatsApp template + send subsystem must land first — at minimum a
+message-template schema with per-industry seeding (a new `OnboardingAnswerHandler` on the `industry`
+screen) and an outbound-send/record path that writes a `WHATSAPP_OUTBOUND` timeline event, plus the
+in-app composer. That is TASK-CAMP-001/-008 + TASK-WA-001 (and likely TASK-UX-009) — a feature build
+across multiple backend/slice tasks, not a qa wire-up. Per `/build-slice §6` the slice is therefore
+left **not closed** and **`pending`** (unclaimed, nothing built), matching ISS-040: the blocker is an
+external unbuilt dependency found at planning, not half-built work. The missing dependency edges were
+**not** auto-added — the minimal true set (full Flow-3 vs. template-seed-only) is a scoping decision
+surfaced to the developer.
+
+**Found:** 2026-08-14, TASK-UX-003 `/build-slice` planning (§2–3).
+
+### ISS-044 · "Continue with Google" on signup is a dead link — the frontend page does not exist
+
+`salesnova_frontend/src/components/signup/identifier-form.tsx:47-52` (renders `<a href="/signup/google">`)
+· `salesnova_frontend/src/app/signup/` (only `page.tsx` + `signup-actions.ts` — no `google/` route)
+
+The signup identifier screen offers *"Continue with Google"* as an `<a href="/signup/google">`, but no
+`/signup/google` page exists in the Next app, so the link 404s. The backend endpoint **is** built and
+registered — POST `/signup/google` (`GoogleSignupController`, `customer.php:22,119`) — but nothing on
+the frontend calls it. Flow 1's step 1 names "email or Google" as the one-field entry; the email half
+is live, the Google half is a dead button on a live screen.
+
+**What closes it:** a `/signup/google` route (OAuth start + callback) that posts to the existing POST
+`/signup/google` and lands the session through the same `landInApp()` handoff the email path uses.
+Small-to-M frontend work, independent of the WhatsApp blocker above.
+
+**Found:** 2026-08-14, TASK-UX-003 `/build-slice` exploration.

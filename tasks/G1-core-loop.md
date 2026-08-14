@@ -513,7 +513,7 @@ flowchart LR
 
 | ID | Title | Track | Size | Depends On | Spec Refs |
 |---|---|---|---|---|---|
-| TASK-UX-003 | Implement the signup-to-first-message onboarding flow UI (Flow 1) | frontend | L | TASK-DESIGN-002, TASK-DESIGN-003, TASK-DESIGN-004, TASK-DESIGN-005, TASK-DESIGN-007, TASK-ARCH-022, TASK-AUTH-008, TASK-LEAD-004, TASK-AUTH-004, TASK-AUTH-005, TASK-AUTH-006 | SN-UX-001 |
+| TASK-UX-003 | Implement the signup-to-first-message onboarding flow UI (Flow 1) | frontend | L | TASK-DESIGN-002, TASK-DESIGN-003, TASK-DESIGN-004, TASK-DESIGN-005, TASK-DESIGN-007, TASK-ARCH-022, TASK-AUTH-008, TASK-LEAD-004, TASK-AUTH-004, TASK-AUTH-005, TASK-AUTH-006, TASK-CAMP-001, TASK-WA-001 | SN-UX-001 |
 | TASK-UX-004 | Integrate the onboarding flow with live backend | qa | M | TASK-UX-003, TASK-AUTH-012, TASK-AUTH-013 | SN-UX-001 |
 | TASK-UX-005 | QA Flow 1 against its budget | qa | S | TASK-UX-004 | SN-UX-001 |
 | TASK-UX-006 | Implement the lead-arrival-to-first-response flow UI (Flow 2) | frontend | M | TASK-DESIGN-008, TASK-DESIGN-007, TASK-UX-002, TASK-ARCH-022, TASK-LEAD-004, TASK-NOTIF-002, TASK-TEAM-002 | SN-UX-002 |
