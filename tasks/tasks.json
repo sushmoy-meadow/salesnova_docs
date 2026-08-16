@@ -8528,7 +8528,8 @@
         "wa_message_id carries a unique constraint",
         "whatsapp_message supports is_edited/original_body and is_revoked without deleting the row"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-002",
@@ -8553,7 +8554,8 @@
         "coexistence_sync_job records per-phase counts for history sync",
         "whatsapp_account exposes health_state and last_app_activity_at queryable columns"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-003",
@@ -8580,7 +8582,8 @@
       "acceptance_criteria": [
         "No route handler or frontend contract references a BSP-specific field; all access is through WhatsAppChannelProvider normalised types"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-004",
@@ -8610,7 +8613,8 @@
       "acceptance_criteria": [
         "The send-message response contract includes service_window_expires_at and a mapped-error shape"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-005",
@@ -8654,7 +8658,8 @@
       "acceptance_criteria": [
         "No application code outside the provider adapter directory references a Meta or BSP-specific type or endpoint"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-007",
@@ -8772,7 +8777,8 @@
       "acceptance_criteria": [
         "An unmatched contact sync of 800 contacts creates zero leads by default and instead populates a reviewable import list"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-011",
@@ -8797,7 +8803,8 @@
       "acceptance_criteria": [
         "AC-WA-025.1"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-012",
@@ -8819,7 +8826,8 @@
       "acceptance_criteria": [
         "A media message is retrievable from our own storage after Meta original URL would have expired"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-013",
@@ -8845,7 +8853,8 @@
         "A send attempted after the service window closes returns 423 WA_SERVICE_WINDOW_CLOSED without reaching the provider",
         "A send to an opted-out lead returns 423 WA_OPTED_OUT and is never dispatched"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-014",
@@ -8867,7 +8876,8 @@
         "Enqueuing 1000 messages results in a measured dispatch rate that does not exceed 5/sec per account",
         "Pending count and ETA are queryable mid-dispatch"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-015",
@@ -9029,7 +9039,8 @@
         "A Free-plan org can send and receive unlimited free-form in-window messages with zero credit debits",
         "Only template sends produce a credit-ledger debit"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-WA-021",
@@ -9229,7 +9240,8 @@
       "acceptance_criteria": [
         "whatsapp_template stores category, approval status and rejection reason distinctly"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-002",
@@ -9254,7 +9266,8 @@
         "campaign_recipient status supports the full state list including SKIPPED_OPTED_OUT",
         "campaign stores the filter definition itself, not resolved lead ids, for FILTER-sourced audiences"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-003",
@@ -9299,7 +9312,8 @@
       "acceptance_criteria": [
         "A template starting with a variable is rejected by the validation layer before any Meta API call"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-005",
@@ -9325,7 +9339,8 @@
       "acceptance_criteria": [
         "AC-CAMP-012.1"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-006",
@@ -9384,7 +9399,8 @@
       "acceptance_criteria": [
         "A REJECTED template shows Meta rejection reason translated to plain language and can be resubmitted in one action after edits"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-008",
@@ -9405,7 +9421,8 @@
       "acceptance_criteria": [
         "Selecting a library template and clicking submit creates an org-owned whatsapp_template in PENDING status without manual re-entry"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-009",
@@ -9441,7 +9458,8 @@
       "acceptance_criteria": [
         "A number transitioning to RED is reflected in quality_rating within one health-poll cycle"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-011",
@@ -9567,7 +9585,8 @@
       "acceptance_criteria": [
         "AC-CAMP-016.1"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sakib"
     },
     {
       "id": "TASK-CAMP-016",
@@ -10994,7 +11013,8 @@
         "AC-NOTIF-002.1 — a webhook-created lead notification is measured delivered within 5s p95",
         "AC-NOTIF-041.1 — 10 leads assigned within 3 minutes produce exactly one grouped notification"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-004",
@@ -11026,7 +11046,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-NOTIF-009"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-005",
@@ -11057,7 +11078,8 @@
       "blocked_reason": null,
       "absorbed": [
         "TASK-NOTIF-011"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-006",
@@ -11091,7 +11113,8 @@
       "absorbed": [
         "TASK-NOTIF-007",
         "TASK-NOTIF-010"
-      ]
+      ],
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-007",
@@ -11126,7 +11149,8 @@
       "acceptance_criteria": [
         "A member with 7 days of consecutive push/email failures triggers a surfaced alert to the org owner"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-009",
@@ -11200,7 +11224,8 @@
       "acceptance_criteria": [
         "An end-to-end new-lead event produces a correctly deep-linked, on-time notification in the running app"
       ],
-      "blocked_reason": null
+      "blocked_reason": null,
+      "owner": "sushmoy"
     },
     {
       "id": "TASK-NOTIF-013",
