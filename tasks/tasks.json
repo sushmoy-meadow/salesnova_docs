@@ -6204,7 +6204,7 @@
       "track": "backend",
       "domain": "CONT",
       "gate": "G2",
-      "status": "pending",
+      "status": "done",
       "description": "Define routes, form requests, policies and OpenAPI-generated response contracts (per 09-technical-architecture.md SN-ARCH-032) for: GET/POST/PATCH/DELETE /api/v1/content (+ type-specific sub-resources for messages/files/pages), GET /api/v1/content/tokens (personalisation vocabulary derived from org custom-field schema, SN-CONT-011), GET /api/v1/page-templates/{key}/schema (block vocabulary, SN-CONT-031 - client must never hardcode this), the file-signing endpoint enforcing the 100MB/200-page limits at signing time before any byte moves (SN-CONT-021, returns 423 PLAN_LIMIT_REACHED per AC-CONT-020.1), WhatsApp-template authoring validation returning 422 with the specific Meta constraint violated (SN-CONT-012, AC-CONT-012.1), search/filter query params (title/body/private-notes search; filter by type/folder/label/visibility/owner/shared-state/engagement, SN-CONT-043), and deletion pre-check response shape stating link/open/sequence-reference counts and blocking with 409 naming the sequence when referenced (SN-CONT-006, AC-CONT-006.1). Scaffold policies for content.set_visibility_org and content.set_visibility_subteam capabilities (SN-CONT-003). Publish the generated TypeScript types the frontend consumes - this is the artifact that unblocks all CONT frontend tasks.",
       "spec_refs": [
         "SN-CONT-003",
@@ -9892,7 +9892,7 @@
       "track": "backend",
       "domain": "TEAM",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define routes, form requests, response resources, policies and generated TypeScript types for: GET/POST /api/v1/members with query flags include_self, include_invited, status, apply_subteams, has_whatsapp; invite (single, bulk up to 50), resend, cancel, deactivate (requiring reassignment target, else 422), reactivate; sub-team CRUD /api/v1/subteams; team dashboard GET /api/v1/team/dashboard with date-range/subteam/group/source filters, ISO-8601 from/to, drill-down list endpoint, CSV export (async, audit-logged); escalation config GET/PATCH /api/v1/settings/escalation. Scaffold policies enforcing capability checks and seat-limit checks that return 402/423 style paywall errors per plan.",
       "spec_refs": [
         "SN-TEAM-001",
@@ -10951,7 +10951,7 @@
       "track": "backend",
       "domain": "NOTIF",
       "gate": "G1",
-      "status": "pending",
+      "status": "done",
       "description": "Define routes, validation, policies and generated TS types for: preference matrix GET/PATCH /api/v1/notifications/preferences with category-level toggles and presets (All on / Essentials only / Digest only / All off); a validation rule rejecting attempts to disable payment-failure, WhatsApp-disconnection or security-event notifications with a 422 explanation; push subscription registration POST /api/v1/notifications/push-subscription; in-app centre GET /api/v1/notifications (grouped by day, filterable) and PATCH mark-read individual/bulk; org-default preference endpoint for owners with per-member override.",
       "spec_refs": [
         "SN-NOTIF-022",
