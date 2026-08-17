@@ -111,3 +111,9 @@ new `Button`/`ActionControl` now cover: `invite/invite-acceptance-form.tsx`,
 All five lose `aria-busy`, the loading spinner and the focus-visible ring by hand-rolling. They are
 not converted here: they belong to the AUTH tasks that own those screens, and the signup files are
 being written concurrently.
+
+**Four of the five have since been converted** by the pending-state sweep, which needed the spinner
+those screens were missing: `invite/invite-acceptance-form.tsx` and all three signup forms now use
+`Button`/`SubmitButton` and get the focus ring and the 44px target with it. Only
+`invite/invite-dead-end.tsx` is still hand-rolled — it is a navigation rather than a write, so the
+sweep had no reason to reach it. See `open-pending-state-sweep.md`.
